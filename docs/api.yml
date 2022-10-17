@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: "This is the API for the augmented book project."
-  version: 1.1.0
+  version: 1.1.1
   title: Augmented Book
   termsOfService: https://phundrak.com/privacy
   contact:
@@ -488,8 +488,8 @@ paths:
     post:
       tags:
         - book fragments
-      summary: Add a new book to the library
-      description: ""
+      summary: Add a new fragment to a book
+      description: "Add a new fragment to an existing book. If the rank of the fragment is too high, it will simply be appended and the actual rank will be returned by the API."
       operationId: addNewBookFragment
       parameters:
         - name: bookId
@@ -499,36 +499,22 @@ paths:
           schema:
             type: string
       requestBody:
-        $ref: "#/components/requestBodies/BookFragment"
+        $ref: "#/components/requestBodies/BookFragmentInsert"
       responses:
         "200":
           description: Successful operation
+        "202":
+          description: Successful operation, reranked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  newRank:
+                    type: integer
+                    example: 6
         "405":
           description: Invalid input
-    put:
-      tags:
-        - book fragments
-      summary: Update an existing book fragment
-      description: ""
-      operationId: updateExistingBookFragment
-      parameters:
-        - name: bookId
-          in: path
-          description: ID of the book whose fragments to return
-          required: true
-          schema:
-            type: string
-      requestBody:
-        $ref: "#/components/requestBodies/BookFragment"
-      responses:
-        "200":
-          description: Successful operation
-        "400":
-          description: Invalid title supplied
-        "404":
-          description: Book fragment not found
-        "405":
-          description: Validation exception
   "/book/{bookId}/fragment/{rank}":
     get:
       tags:
@@ -556,12 +542,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BookFragment"
-    post:
+    put:
       tags:
         - book fragments
-      summary: Update a single book fragment
-      description: Update a single book fragment of a specific book
-      operationId: updateSingleBookFragment
+      summary: Update an existing book fragment
+      description: "Change the content of a book fragment or reorder it"
+      operationId: updateExistingBookFragment
       parameters:
         - name: api_key
           in: header
@@ -570,7 +556,7 @@ paths:
             type: string
         - name: bookId
           in: path
-          description: ID of the book whose fragment to return
+          description: ID of the book whose fragments to return
           required: true
           schema:
             type: string
@@ -583,8 +569,24 @@ paths:
       requestBody:
         $ref: "#/components/requestBodies/BookFragment"
       responses:
+        "200":
+          description: Successful operation
+        "202":
+          description: Successful operation, reranked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  newRank:
+                    type: integer
+                    example: 6
+        "400":
+          description: Invalid title supplied
+        "404":
+          description: Book fragment not found
         "405":
-          description: Invalid input
+          description: Validation exception
     delete:
       tags:
         - book fragments
@@ -615,6 +617,58 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Fragment not found
+  "/book/{bookId}/fragment/{rank}/reorder":
+    put:
+      tags:
+        - book fragments
+      summary: Reorder a book fragment
+      description: Reorder a book fragment to the specified rank in the JSON body. If the target rank is too great, the fragment will be appended and the API will answer with the new rank.
+      operationId: reorderFragment
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: bookId
+          in: path
+          description: ID of the book whose fragments to return
+          required: true
+          schema:
+            type: string
+        - name: rank
+          in: path
+          description: Rank of the fragment to return
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                to:
+                  type: integer
+                  example: 6
+      responses:
+        "200":
+          description: Operation successful
+        "202":
+          description: Successful operation, reranked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  newRank:
+                    type: integer
+                    example: 6
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Fragment not found
+
 servers:
   - url: https://livre.phundrak.com/api/v1
 components:
@@ -646,9 +700,45 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/BookFragment"
+            type: object
+            required:
+              - fragment
+            properties:
+              fragment:
+                $ref: "#/components/schemas/BookFragment"
+              method:
+                type: string
+                description: "How to add the new book fragment"
+                enum:
+                  - simple
+                  - append
+                  - insert
+              rank:
+                type: integer
+                description: "When inserting, at which rank to insert the fragment"
       description: BookFragment object that needs to be added to the library
       required: true
+    BookFragmentInsert:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - rank
+              - fragment
+            properties:
+              rank:
+                type: integer
+                example: 6
+              method:
+                type: string
+                example: "insert"
+                enum:
+                  - append
+                  - insert
+                  - replace
+              fragment:
+                $ref: "#/components/schemas/BookFragment"
   schemas:
     Author:
       type: object
@@ -779,7 +869,5 @@ components:
         code:
           type: integer
           format: int32
-        type:
-          type: string
         message:
           type: string
