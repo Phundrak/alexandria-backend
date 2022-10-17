@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use rocket::serde::{Serialize, Deserialize};
+use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Deserialize, Serialize)]
 #[serde(crate = "rocket::serde")]
