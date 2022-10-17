@@ -1,0 +1,785 @@
+openapi: 3.0.0
+info:
+  description: "This is the API for the augmented book project."
+  version: 1.1.0
+  title: Augmented Book
+  termsOfService: https://phundrak.com/privacy
+  contact:
+    email: lucien@phundrak.com
+  license:
+    name: AGPL 3.0
+    url: https://www.gnu.org/licenses/agpl-3.0.txt
+tags:
+  - name: author
+    description: Operations about authors
+  - name: book
+    description: Operations about books
+  - name: book fragments
+    description: Operations about book fragments
+paths:
+  /author:
+    post:
+      deprecated: true
+      tags:
+        - author
+      summary: Add a new author to the library
+      description: ""
+      operationId: addAuthor
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/Author"
+      responses:
+        "405":
+          description: Invalid input
+    put:
+      deprecated: true
+      tags:
+        - author
+      summary: Update an existing author
+      description: ""
+      operationId: updateAuthor
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/Author"
+      responses:
+        "400":
+          description: Invalid title supplied
+        "404":
+          description: Author not found
+        "405":
+          description: Validation exception
+  /authors:
+    get:
+      tags:
+        - author
+      summary: Get list of authors
+      description: Get a list of all the authors stored in the library
+      operationId: listAuthors
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Author"
+    post:
+      tags:
+        - author
+      summary: Add a new author to the library
+      description: ""
+      operationId: addNewAuthor
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/Author"
+      responses:
+        "200":
+          description: Successful operation
+        "405":
+          description: Invalid input
+    put:
+      tags:
+        - author
+      summary: Update an existing author
+      description: ""
+      operationId: updateExistingAuthor
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/Author"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid id supplied
+        "404":
+          description: Author not found
+        "405":
+          description: Validation exception
+  /author/find:
+    get:
+      tags:
+        - author
+      summary: Find Author by properties
+      description: Find authors by their name.
+      operationId: findAuthor
+      parameters:
+        - name: name
+          in: query
+          description: The server will try to fuzzy-find the author’s name based on this value. Multiple values can be provided with a comma separated string.
+          required: true
+          explode: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+  /author/findByLastName:
+    get:
+      deprecated: true
+      tags:
+        - author
+      summary: Find Author by properties
+      description: Find authors by their last name.
+      operationId: findAuthorByLastName
+      parameters:
+        - name: lastName
+          in: query
+          description: Multiple values can be provided with a comma separated string.
+          required: true
+          explode: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+  "/author/{authorId}":
+    get:
+      tags:
+        - author
+      summary: Find author by ID
+      description: Returns a single author
+      operationId: getAuthorId
+      parameters:
+        - name: authorId
+          in: path
+          description: ID of author to return
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Author not found
+    post:
+      tags:
+        - author
+      summary: Updates a author in the library with form data
+      operationId: updateAuthorById
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: authorId
+          in: path
+          description: ID of author that needs to be updated
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/Author"
+      responses:
+        "200":
+          description: Successful operation
+        "405":
+          description: Invalid input
+    delete:
+      tags:
+        - author
+      summary: Deletes a author
+      operationId: deleteAuthor
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: authorId
+          in: path
+          description: Author id to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Author not found
+        "405":
+          description: Validation exception
+  /book:
+    post:
+      deprecated: true
+      tags:
+        - book
+      summary: Add a new book to the library
+      description: ""
+      operationId: addBook
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/Book"
+      responses:
+        "405":
+          description: Invalid input
+    put:
+      deprecated: true
+      tags:
+        - book
+      summary: Update an existing book
+      description: ""
+      operationId: updateBook
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/Book"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid title supplied
+        "404":
+          description: Book not found
+        "405":
+          description: Validation exception
+  /books:
+    get:
+      tags:
+        - book
+      summary: Get list of books
+      description: Get a list of all the books stored in the library
+      operationId: listBooks
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+    post:
+      tags:
+        - book
+      summary: Add a new book to the library
+      description: ""
+      operationId: addNewBook
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/Book"
+      responses:
+        "200":
+          description: Successful operation
+        "405":
+          description: Invalid input
+    put:
+      tags:
+        - book
+      summary: Update an existing book
+      description: ""
+      operationId: updateExistingBook
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/Book"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid title supplied
+        "404":
+          description: Book not found
+        "405":
+          description: Validation exception
+  /book/find:
+    get:
+      tags:
+        - book
+      summary: Find Book by properties
+      description: Find books by its properties.
+      operationId: findBook
+      parameters:
+        - name: author
+          in: query
+          description: Author values that need to be considered for filter
+          required: true
+          explode: true
+          schema:
+            type: string
+        - name: isbns
+          in: query
+          description: ISBNs to filter by
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: gender
+          in: query
+          description: Gender to filter by
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: type
+          in: query
+          description: Book type to filter by
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+        "400":
+          description: invalid book type
+  "/book/{bookId}":
+    get:
+      tags:
+        - book
+      summary: Find book by ID
+      description: Returns a single book
+      operationId: getBookId
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of book to return
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Book not found
+    post:
+      tags:
+        - book
+      summary: Updates a book in the library with form data
+      operationId: updateBookWithFormData
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: bookId
+          in: path
+          description: ID of book that needs to be updated
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/Book"
+      responses:
+        "200":
+          description: Successful operation
+        "405":
+          description: Invalid input
+    delete:
+      tags:
+        - book
+      summary: Deletes a book
+      operationId: deleteBook
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: bookId
+          in: path
+          description: Book id to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Book not found
+  "/book/{bookId}/fragments":
+    get:
+      tags:
+        - book fragments
+      summary: Get list of book fragments
+      description: Returns the list of fragments from a single book
+      operationId: getBookFragments
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of the book whose fragments to return
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BookFragmentSimple"
+    post:
+      tags:
+        - book fragments
+      summary: Add a new book to the library
+      description: ""
+      operationId: addNewBookFragment
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of the book whose fragments to return
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/BookFragment"
+      responses:
+        "200":
+          description: Successful operation
+        "405":
+          description: Invalid input
+    put:
+      tags:
+        - book fragments
+      summary: Update an existing book fragment
+      description: ""
+      operationId: updateExistingBookFragment
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of the book whose fragments to return
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/BookFragment"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid title supplied
+        "404":
+          description: Book fragment not found
+        "405":
+          description: Validation exception
+  "/book/{bookId}/fragment/{rank}":
+    get:
+      tags:
+        - book fragments
+      summary: Get single book fragment
+      description: Returns a single fragment of a specific book
+      operationId: getSingleBookFragment
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of the book whose fragment to return
+          required: true
+          schema:
+            type: string
+        - name: rank
+          in: path
+          description: Rank of the fragment to return
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookFragment"
+    post:
+      tags:
+        - book fragments
+      summary: Update a single book fragment
+      description: Update a single book fragment of a specific book
+      operationId: updateSingleBookFragment
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: bookId
+          in: path
+          description: ID of the book whose fragment to return
+          required: true
+          schema:
+            type: string
+        - name: rank
+          in: path
+          description: Rank of the fragment to return
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/BookFragment"
+      responses:
+        "405":
+          description: Invalid input
+    delete:
+      tags:
+        - book fragments
+      summary: Delete a fragment
+      operationId: deleteFragment
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: bookId
+          in: path
+          description: Book ID in which to find the fragment to delete
+          required: true
+          schema:
+            type: string
+        - name: rank
+          in: path
+          description: rank of the fragment to delete
+          schema:
+            type: integer
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Fragment not found
+servers:
+  - url: https://livre.phundrak.com/api/v1
+components:
+  requestBodies:
+    BookArray:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Book"
+      description: List of user object
+      required: true
+    Author:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Author"
+      description: Author object that needs to be added to the library
+      required: true
+    Book:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Book"
+      description: Book object that needs to be added to the library
+      required: true
+    BookFragment:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BookFragment"
+      description: BookFragment object that needs to be added to the library
+      required: true
+  schemas:
+    Author:
+      type: object
+      required:
+        - lastName
+      properties:
+        id:
+          type: string
+          example: "Gillian Rubinstein"
+        firstName:
+          type: string
+          example: "Gillian"
+        lastName:
+          type: string
+          example: "Rubinstein"
+        alias:
+          type: string
+          example: "Lian Hearn"
+    BookFragmentSimple:
+      type: object
+      required:
+        - rank
+        - book
+      properties:
+        book:
+          type: string
+          example: "lord-of-the-rings-two-towers-tolkien"
+        rank:
+          type: integer
+          example: 23
+    BookFragment:
+      type: object
+      required:
+        - text
+        - rank
+        - book
+        - bgSoundType
+        - imageType
+      properties:
+        book:
+          type: string
+          example: "lord-of-the-rings-two-towers-tolkien"
+        rank:
+          type: integer
+          example: 23
+        text:
+          type: string
+        oneShotSoundSource:
+          type: string
+          example: "https://s3.example.com/oneshot.mp3"
+        bgSoundType:
+          type: string
+          description: "What should be played"
+          enum:
+            - none
+            - same
+            - url
+        bgSoundSource:
+          type: string
+          example: "https://s3.example.com/bg.mp3"
+        imageType:
+          type: string
+          description: "What kind of image should be used"
+          enum:
+            - none
+            - same
+            - auto
+            - url
+        imageSource:
+          type: string
+          example: "https://s3.example.com/bg.jpg"
+    Book:
+      type: object
+      required:
+        - name
+        - author
+        - type
+      properties:
+        id:
+          type: string
+          example: "lord-of-the-rings-two-towers-tolkien"
+        name:
+          type: string
+          example: "Lord of the Rings: Two Towers"
+        author:
+          type: string
+          example: "jrrtolkien"
+        isbns:
+          type: array
+          xml:
+            name: isbn
+            wrapped: true
+          items:
+            type: string
+            example: "9780547928203"
+        cover:
+          type: string
+          example: "https://upload.wikimedia.org/wikipedia/en/a/a1/The_Two_Towers_cover.gif"
+        publisher:
+          type: string
+          example: "Harper Collins"
+        published:
+          type: string
+          example: "2012-09-18"
+        genres:
+          type: array
+          xml:
+            name: genre
+            wrapped: true
+          items:
+            type: string
+            example: "fantasy"
+        synopsis:
+          type: string
+          example: "Frodo and his Companions of the Ring have been beset by danger during their quest to prevent the Ruling Ring from falling into the hands of the Dark Lord by destroying it in the Cracks of Doom. They have lost the wizard, Gandalf, in a battle in the Mines of Moria. And Boromir, seduced by the power of the Ring, tried to seize it by force. While Frodo and Sam made their escape, the rest of the company was attacked by Orcs. Now they continue the journey alone down the great River Anduin—alone, that is, save for the mysterious creeping figure that follows wherever they go."
+        type:
+          type: string
+          description: "What kind of text is it"
+          enum:
+            - novel
+            - short-story
+            - poem
+      xml:
+        name: Book
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string

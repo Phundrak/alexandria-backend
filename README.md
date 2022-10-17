@@ -32,3 +32,6 @@ cargo run --bin server --release
 ```shell
 cargo clippy
 ```
+
+## REST API
+The specification of the REST API can be found in the file `docs/api.yml`
