@@ -16,33 +16,6 @@ pub struct ApiResponse {
     message: String,
 }
 
-pub struct AuthorJson {
-    id: String,
-    first_name: String,
-    last_name: String,
-    alias: String,
-}
-
-pub struct BookJson {
-    id: String,
-    name: String,
-    author: AuthorJson,
-    isbns: Vec<String>,
-    cover: String,
-    publisher: Option<String>,
-    published: Option<String>,
-    genres: Vec<String>,
-    synopsis: Option<String>,
-    book_type: String,
-}
-
-pub struct BookFragmentJson {
-    book: BookJson,
-    rank: i32,
-    text: String,
-    one_shot_sound_source: Option<String>,
-}
-
 type JsonResponse<T> = Result<Json<T>, Json<ApiResponse>>;
 
 macro_rules! json_val_or_error {
