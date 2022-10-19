@@ -46,11 +46,10 @@ diesel::table! {
         isbn -> Nullable<Array<Nullable<Text>>>,
         cover -> Nullable<Varchar>,
         publisher -> Nullable<Varchar>,
-        published -> Nullable<Varchar>,
+        published -> Nullable<Date>,
         genre -> Nullable<Array<Nullable<Text>>>,
         synopsis -> Nullable<Text>,
-        #[sql_name = "type"]
-        type_ -> Nullable<Varchar>,
+        booktype -> Nullable<Varchar>,
     }
 }
 

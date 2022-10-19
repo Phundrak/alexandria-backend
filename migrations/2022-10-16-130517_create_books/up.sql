@@ -11,8 +11,8 @@ CREATE TABLE Books (
        Isbn text[],
        Cover varchar(255),
        Publisher varchar(255),
-       Published varchar(31),
+       Published date,
        Genre text[],
        Synopsis text,
-       Type varchar(31)
+       BookType varchar(31)
 );
