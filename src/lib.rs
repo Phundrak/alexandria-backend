@@ -8,6 +8,8 @@ use std::env;
 pub mod models;
 pub mod schema;
 
+type ApiResult<T> = Result<T, diesel::result::Error>;
+
 pub fn get_connection_pool() -> Pool<ConnectionManager<PgConnection>> {
     dotenv().ok();
     let database_url =
@@ -19,46 +21,50 @@ pub fn get_connection_pool() -> Pool<ConnectionManager<PgConnection>> {
         .expect("Could not build connection pool")
 }
 
-pub fn list_authors(connector: &mut PgConnection) -> Vec<Author> {
+pub fn list_authors(connector: &mut PgConnection) -> ApiResult<Vec<Author>> {
     use self::schema::authors::dsl::*;
-    authors
-        .load::<Author>(connector)
-        .expect("Error fetching authors")
+    authors.load::<Author>(connector)
 }
 
-pub fn get_author(connector: &mut PgConnection, id: String) -> Author {
+pub fn get_author(
+    connector: &mut PgConnection,
+    id: String,
+) -> ApiResult<Author> {
     use self::schema::authors::dsl::*;
-    authors
-        .find(id)
-        .first(connector)
-        .expect("Could not find author")
+    authors.find(id).first(connector)
 }
 
-pub fn delete_author(connector: &mut PgConnection, id: String) {
+pub fn delete_author(
+    connector: &mut PgConnection,
+    id: String,
+) -> ApiResult<()> {
     use self::schema::authors::dsl::*;
-    diesel::delete(authors.find(id))
-        .execute(connector)
-        .expect("Could not delete author");
+    match diesel::delete(authors.find(id)).execute(connector) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
 }
 
-pub fn list_books(connector: &mut PgConnection) -> Vec<Book> {
+pub fn list_books(connector: &mut PgConnection) -> ApiResult<Vec<Book>> {
     use self::schema::books::dsl::*;
-    books
-        .load::<Book>(connector)
-        .expect("Error fetching authors")
+    books.load::<Book>(connector)
 }
 
-pub fn get_book(connector: &mut PgConnection, id: String) -> Book {
+pub fn get_book(
+    connector: &mut PgConnection,
+    identifier: String,
+) -> ApiResult<Book> {
     use self::schema::books::dsl::*;
-    books
-        .find(id)
-        .first(connector)
-        .expect("Could not find book")
+    books.find(identifier).first(connector)
 }
 
-pub fn delete_book(connector: &mut PgConnection, id: String) {
+pub fn delete_book(
+    connector: &mut PgConnection,
+    identifier: String,
+) -> ApiResult<()> {
     use self::schema::books::dsl::*;
-    diesel::delete(books.find(id))
-        .execute(connector)
-        .expect("Could not delete book");
+    match diesel::delete(books.find(identifier)).execute(connector) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
 }
