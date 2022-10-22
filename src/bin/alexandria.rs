@@ -66,34 +66,22 @@ mod author {
     use alexandria::models::Author;
     use rocket::State;
 
+    #[get("/")]
+    pub fn list(db: &State<DbConnection>) -> JsonResponse<Vec<Author>> {
+        let connector = &mut db.pool.get().unwrap();
+        json_val_or_error!(alexandria::list_authors(connector))
+    }
+
     #[get("/<id>")]
-    pub fn get_author(
-        db: &State<DbConnection>,
-        id: String,
-    ) -> JsonResponse<Author> {
+    pub fn get(db: &State<DbConnection>, id: String) -> JsonResponse<Author> {
         let connector = &mut db.pool.get().unwrap();
         json_val_or_error!(alexandria::get_author(connector, id))
     }
 
     #[delete("/<id>")]
-    pub fn remove_author(
-        db: &State<DbConnection>,
-        id: String,
-    ) -> JsonResponse<()> {
+    pub fn delete(db: &State<DbConnection>, id: String) -> JsonResponse<()> {
         let connector = &mut db.pool.get().unwrap();
         json_val_or_error!(alexandria::delete_author(connector, id))
-    }
-}
-
-mod authors {
-    use crate::{ApiResponse, DbConnection, Json, JsonResponse};
-    use alexandria::models::Author;
-    use rocket::State;
-
-    #[get("/")]
-    pub fn list_authors(db: &State<DbConnection>) -> JsonResponse<Vec<Author>> {
-        let connector = &mut db.pool.get().unwrap();
-        json_val_or_error!(alexandria::list_authors(connector))
     }
 }
 
@@ -102,34 +90,22 @@ mod book {
     use alexandria::models::Book;
     use rocket::State;
 
+    #[get("/")]
+    pub fn list(db: &State<DbConnection>) -> JsonResponse<Vec<Book>> {
+        let connector = &mut db.pool.get().unwrap();
+        json_val_or_error!(alexandria::list_books(connector))
+    }
+
     #[get("/<id>")]
-    pub fn get_book(
-        db: &State<DbConnection>,
-        id: String,
-    ) -> JsonResponse<Book> {
+    pub fn get(db: &State<DbConnection>, id: String) -> JsonResponse<Book> {
         let connector = &mut db.pool.get().unwrap();
         json_val_or_error!(alexandria::get_book(connector, id))
     }
 
     #[delete("/<id>")]
-    pub fn delete_book(
-        db: &State<DbConnection>,
-        id: String,
-    ) -> JsonResponse<()> {
+    pub fn delete(db: &State<DbConnection>, id: String) -> JsonResponse<()> {
         let connector = &mut db.pool.get().unwrap();
         json_val_or_error!(alexandria::delete_book(connector, id))
-    }
-}
-
-mod books {
-    use crate::{ApiResponse, DbConnection, Json, JsonResponse};
-    use alexandria::models::Book;
-    use rocket::State;
-
-    #[get("/")]
-    pub fn list_books(db: &State<DbConnection>) -> JsonResponse<Vec<Book>> {
-        let connector = &mut db.pool.get().unwrap();
-        json_val_or_error!(alexandria::list_books(connector))
     }
 }
 
@@ -138,11 +114,9 @@ fn rocket() -> _ {
     rocket::build()
         .mount(
             "/author",
-            routes![author::get_author, author::remove_author],
+            routes![author::get, author::delete, author::list],
         )
-        .mount("/authors", routes![authors::list_authors,])
-        .mount("/book", routes![book::get_book, book::delete_book])
-        .mount("/books", routes![books::list_books])
+        .mount("/book", routes![book::get, book::delete, book::list])
         .manage(DbConnection {
             pool: alexandria::get_connection_pool(),
         })
