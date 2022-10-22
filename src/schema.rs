@@ -2,6 +2,10 @@
 
 pub mod sql_types {
     #[derive(diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "booktype"))]
+    pub struct Booktype;
+
+    #[derive(diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "imagetype"))]
     pub struct Imagetype;
 
@@ -28,9 +32,9 @@ diesel::table! {
         id -> Varchar,
         content -> Text,
         oneshotsoundsource -> Nullable<Varchar>,
-        bgsoundtype -> Nullable<Soundtype>,
+        bgsoundtype -> Soundtype,
         bgsoundsource -> Nullable<Varchar>,
-        imgtype -> Nullable<Imagetype>,
+        imgtype -> Imagetype,
         imgsource -> Nullable<Varchar>,
         book -> Varchar,
         chapter -> Int4,
@@ -39,17 +43,20 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::Booktype;
+
     books (id) {
         id -> Varchar,
         title -> Varchar,
-        author -> Nullable<Varchar>,
+        author -> Varchar,
         isbn -> Nullable<Array<Nullable<Text>>>,
         cover -> Nullable<Varchar>,
         publisher -> Nullable<Varchar>,
         published -> Nullable<Date>,
         genre -> Nullable<Array<Nullable<Text>>>,
         synopsis -> Nullable<Text>,
-        booktype -> Nullable<Varchar>,
+        booktype -> Booktype,
     }
 }
 

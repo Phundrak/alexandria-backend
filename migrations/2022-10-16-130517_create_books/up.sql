@@ -1,18 +1,19 @@
 -- Your SQL goes here
-create type BookType as enum ('novel', 'short-story', 'poem');
+CREATE TYPE BookType AS ENUM ('novel', 'short-story', 'poem');
 
 CREATE TABLE Books (
-       Id varchar(255) primary key,
-       Title varchar(255) not null,
-       Author varchar(255)
-              references Authors(Slug)
-              on update cascade
-              on delete cascade,
-       Isbn text[],
-       Cover varchar(255),
-       Publisher varchar(255),
-       Published date,
-       Genre text[],
-       Synopsis text,
-       BookType varchar(31)
+       Id VARCHAR(255) PRIMARY KEY,
+       Title VARCHAR(255) NOT NULL,
+       Author VARCHAR(255)
+              REFERENCES Authors(Slug)
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+              NOT NULL,
+       Isbn TEXT[],
+       Cover VARCHAR(255),
+       Publisher VARCHAR(255),
+       Published DATE,
+       Genre TEXT[],
+       Synopsis TEXT,
+       BookType BookType NOT NULL
 );
