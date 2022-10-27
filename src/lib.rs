@@ -2,10 +2,13 @@
 #![allow(clippy::no_effect_underscore_binding)]
 
 use diesel::pg::PgConnection;
-use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
-use dotenvy::dotenv;
+use diesel::{insert_into, prelude::*};
 use models::{Author, Book};
+
+use uuid::Uuid;
+
+use dotenvy::dotenv;
 use std::env;
 
 pub mod models;
@@ -41,6 +44,31 @@ pub fn list_authors(connector: &mut PgConnection) -> ApiResult<Vec<Author>> {
     authors.load::<Author>(connector)
 }
 
+/// Add a new author in the database
+///
+/// # Errors
+///
+/// If an error is returned by diesel, forward it to the function
+/// calling `new_author`
+pub fn new_author(
+    connector: &mut PgConnection,
+    author: Author,
+) -> ApiResult<usize> {
+    use self::schema::authors::dsl::authors;
+    insert_into(authors).values(author).execute(connector)
+}
+
+/// Update an existing author in the database
+///
+/// # Errors
+///
+/// If an error is returned by diesel, forward it to the function
+/// calling `update_author`
+// pub fn update_author(connector: &mut PgConnection, author: Author) -> ApiResult<()> {
+//     use self::schema::authors::dsl::authors;
+// }
+
+
 /// Get a specific author from the database
 ///
 /// Find an author with holding the specific identifier `id`.
@@ -51,7 +79,7 @@ pub fn list_authors(connector: &mut PgConnection) -> ApiResult<Vec<Author>> {
 /// calling `get_author`
 pub fn get_author(
     connector: &mut PgConnection,
-    id: String,
+    id: Uuid,
 ) -> ApiResult<Author> {
     use self::schema::authors::dsl::authors;
     authors.find(id).first(connector)
@@ -67,7 +95,7 @@ pub fn get_author(
 /// calling `delete_author`
 pub fn delete_author(
     connector: &mut PgConnection,
-    id: String,
+    id: Uuid,
 ) -> ApiResult<()> {
     use self::schema::authors::dsl::authors;
     match diesel::delete(authors.find(id)).execute(connector) {
@@ -97,7 +125,7 @@ pub fn list_books(connector: &mut PgConnection) -> ApiResult<Vec<Book>> {
 /// calling `get_book`
 pub fn get_book(
     connector: &mut PgConnection,
-    identifier: String,
+    identifier: Uuid,
 ) -> ApiResult<Book> {
     use self::schema::books::dsl::books;
     books.find(identifier).first(connector)
@@ -113,7 +141,7 @@ pub fn get_book(
 /// calling `delete_book`
 pub fn delete_book(
     connector: &mut PgConnection,
-    identifier: String,
+    identifier: Uuid,
 ) -> ApiResult<()> {
     use self::schema::books::dsl::books;
     match diesel::delete(books.find(identifier)).execute(connector) {

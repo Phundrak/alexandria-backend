@@ -2,10 +2,10 @@
 CREATE TYPE BookType AS ENUM ('novel', 'short-story', 'poem');
 
 CREATE TABLE Books (
-       Id VARCHAR(255) PRIMARY KEY,
+       Id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
        Title VARCHAR(255) NOT NULL,
-       Author VARCHAR(255)
-              REFERENCES Authors(Slug)
+       Author UUID
+              REFERENCES Authors(Id)
               ON UPDATE CASCADE
               ON DELETE CASCADE
               NOT NULL,

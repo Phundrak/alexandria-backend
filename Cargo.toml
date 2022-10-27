@@ -6,8 +6,20 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-diesel = { version = "2.0.0", features = ["postgres", "r2d2", "chrono"] }
-diesel-derive-enum = { version = "2.0.0-rc.0", features = ["postgres"] }
+# .env file
 dotenvy = "0.15"
-rocket = { version = "0.5.0-rc.2", features = ["json"] }
+
+# database
+diesel = { version = "2.0.2", features = ["postgres", "extras"] }
+diesel-derive-enum = { version = "2.0.0-rc.0", features = ["postgres"] }
 chrono = { version = "0.4.22", features = ["serde"] }
+uuid = { version = "1.2.1", features = ["v4", "fast-rng", "macro-diagnostics", "serde" ] }
+
+# web server
+rocket = { version = "0.5.0-rc.2", features = ["json"] }
+
+# better error output
+color-eyre = "0.6.2"
+
+# parallel iterators
+# rayon = "1.5.3"

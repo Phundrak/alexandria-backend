@@ -1,7 +1,9 @@
 use diesel::prelude::{Insertable, Queryable};
 use rocket::serde::{Deserialize, Serialize};
 
-use crate::schema::{authors, books, bookfragments};
+use uuid::Uuid;
+
+use crate::schema::{authors, bookfragments, books};
 
 /// Rust representation of the `Autors` table in the database
 ///
@@ -13,10 +15,10 @@ use crate::schema::{authors, books, bookfragments};
 /// All of them except the identifier can be null. However, the pen
 /// name must be set if the first and last names aren’t, and vice
 /// versa.
-#[derive(Queryable, Deserialize, Serialize, Insertable)]
+#[derive(Queryable, Deserialize, Serialize, Insertable, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct Author {
-    pub slug: String,
+    pub id: Uuid,
     pub firstname: Option<String>,
     pub lastname: Option<String>,
     pub penname: Option<String>,
@@ -27,13 +29,13 @@ pub struct Author {
 /// See [`Book`]
 ///
 /// [`Book`]: ./struct.Book.html
-#[derive(Debug, Serialize, Deserialize, diesel_derive_enum::DbEnum)]
+#[derive(Debug, Serialize, Deserialize, diesel_derive_enum::DbEnum, Clone)]
 #[DieselTypePath = "crate::schema::sql_types::Booktype"]
 #[serde(crate = "rocket::serde")]
 pub enum BookType {
     Novel,
     ShortStory,
-    Poem
+    Poem,
 }
 
 /// Rust representation of the `Books` table in the database.
@@ -48,13 +50,13 @@ pub enum BookType {
 /// - The synopsis of the book (can be null)
 /// - The type of book it is (see [`BookType`])
 ///
-/// [`BookType`]: ./struct.Bookfragment.html
-#[derive(Queryable, Deserialize, Serialize, Insertable)]
+/// [`BookType`]: ./enum.BookType.html
+#[derive(Queryable, Deserialize, Serialize, Insertable, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct Book {
-    pub id: String,
+    pub id: Uuid,
     pub title: String,
-    pub author: String,
+    pub author: Uuid,
     pub isbn: Option<Vec<Option<String>>>,
     pub cover: Option<String>,
     pub publisher: Option<String>,
@@ -75,14 +77,14 @@ pub struct Book {
 /// - **Same**: Keep using the previous image
 ///
 /// [`BookFragment`]: ./struct.Bookfragment.html
-#[derive(Debug, Serialize, Deserialize, diesel_derive_enum::DbEnum)]
+#[derive(Debug, Serialize, Deserialize, diesel_derive_enum::DbEnum, Clone)]
 #[DieselTypePath = "crate::schema::sql_types::Imagetype"]
 #[serde(crate = "rocket::serde")]
 pub enum ImageType {
     None,
     Url,
     Auto,
-    Same
+    Same,
 }
 
 /// The type of background sound used for a fragment
@@ -96,13 +98,13 @@ pub enum ImageType {
 ///   fragment
 ///
 /// [`BookFragment`]: ./struct.Bookfragment.html
-#[derive(Debug, Serialize, Deserialize, diesel_derive_enum::DbEnum)]
+#[derive(Debug, Serialize, Deserialize, diesel_derive_enum::DbEnum, Clone)]
 #[DieselTypePath = "crate::schema::sql_types::Soundtype"]
 #[serde(crate = "rocket::serde")]
 pub enum SoundType {
     None,
     Url,
-    Same
+    Same,
 }
 
 /// Rust representation of the `BookFragments` table in the database.
@@ -129,17 +131,17 @@ pub enum SoundType {
 /// [`ImageType`]: ./enum.ImageType.html
 /// [`SoundType`]: ./enum.SoundType.html
 /// [`Book`]: ./struct.Book.html
-#[derive(Queryable, Deserialize, Serialize, Insertable)]
+#[derive(Queryable, Deserialize, Serialize, Insertable, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct Bookfragment {
-    pub id: String,
+    pub id: Uuid,
     pub content: String,
     pub oneshotsoundsource: Option<String>,
     pub bgsoundtype: SoundType,
     pub bgsoundsource: Option<String>,
     pub imgtype: ImageType,
     pub imgsource: Option<String>,
-    pub book: String,
+    pub book: Uuid,
     pub chapter: i32,
     pub rank: i32,
 }
