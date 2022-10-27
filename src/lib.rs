@@ -116,6 +116,20 @@ pub fn delete_author(
     }
 }
 
+/// Add a new book in the database
+///
+/// # Errors
+///
+/// If an error is returned by diesel, forward it to the function
+/// calling `new_book`
+pub fn new_book(
+    connector: &mut PgConnection,
+    book: Book,
+) -> ApiResult<usize> {
+    use self::schema::books::dsl::books;
+    insert_into(books).values(book).execute(connector)
+}
+
 /// List books in the database.
 ///
 /// # Errors

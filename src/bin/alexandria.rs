@@ -191,6 +191,22 @@ mod book {
 
     use uuid::Uuid;
 
+    #[post("/", format = "json", data = "<book>")]
+    pub fn new(
+        book: Json<Book>,
+        db: &State<ServerState>,
+        _key: ApiKey<'_>,
+    ) -> JsonResponse<()> {
+        let connector = &mut db.pool.get().unwrap();
+        match alexandria::new_book(connector, book.into_inner()) {
+            Ok(_) => Ok(Json(())),
+            Err(e) => Err(Json(ApiResponse {
+                code: 500,
+                message: e.to_string(),
+            })),
+        }
+    }
+
     #[get("/")]
     pub fn list(db: &State<ServerState>) -> JsonResponse<Vec<Book>> {
         info!("Listing books");
@@ -245,7 +261,10 @@ fn rocket() -> _ {
                 author::list
             ],
         )
-        .mount("/book", routes![book::get, book::delete, book::list])
+        .mount(
+            "/book",
+            routes![book::new, book::get, book::delete, book::list],
+        )
         .manage(ServerState {
             pool: alexandria::get_connection_pool(),
             api_key: env::var("ALEXANDRIA_ADMIN_KEY")
