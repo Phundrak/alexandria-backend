@@ -1,13 +1,13 @@
+#[macro_use]
+extern crate rocket;
+use rocket::http::Status;
+use rocket::request::{FromRequest, Outcome, Request};
+use rocket::response::status;
+use rocket::serde::json::Json;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenvy::dotenv;
-use rocket::http::Status;
-use rocket::request::{FromRequest, Outcome, Request};
-use rocket::serde::{json::Json, Serialize};
 use std::env;
-
-#[macro_use]
-extern crate rocket;
 
 pub struct ApiKey<'r>(&'r str);
 
@@ -48,14 +48,7 @@ pub struct ServerState {
     api_key: String,
 }
 
-#[derive(Serialize, Debug)]
-#[serde(crate = "rocket::serde")]
-pub struct ApiResponse {
-    code: i32,
-    message: String,
-}
-
-type JsonResponse<T> = Result<Json<T>, Json<ApiResponse>>;
+type JsonResponse<T> = Result<Json<T>, status::Custom<String>>;
 
 macro_rules! json_val_or_error {
     ($result:expr) => {
@@ -63,10 +56,7 @@ macro_rules! json_val_or_error {
             Ok(val) => Ok(Json(val)),
             Err(e) => {
                 info!("Error: {}", e.to_string());
-                Err(Json(ApiResponse {
-                    code: 500,
-                    message: e.to_string(),
-                }))
+                Err(status::Custom(Status::InternalServerError, e.to_string()))
             }
         }
     };
@@ -106,8 +96,10 @@ macro_rules! json_val_or_error {
 mod author {
     use std::str::FromStr;
 
-    use crate::{ApiKey, ApiResponse, Json, JsonResponse, ServerState};
+    use crate::{ApiKey, Json, JsonResponse, ServerState};
     use alexandria::models::Author;
+    use rocket::http::Status;
+    use rocket::response::status;
     use rocket::{log::private::info, State};
 
     use uuid::Uuid;
@@ -121,10 +113,9 @@ mod author {
         let connector = &mut db.pool.get().unwrap();
         match alexandria::new_author(connector, author.into_inner()) {
             Ok(_) => Ok(Json(())),
-            Err(e) => Err(Json(ApiResponse {
-                code: 500,
-                message: e.to_string(),
-            })),
+            Err(e) => {
+                Err(status::Custom(Status::InternalServerError, e.to_string()))
+            }
         }
     }
 
@@ -136,10 +127,9 @@ mod author {
         let connector = &mut db.pool.get().unwrap();
         match alexandria::update_author(connector, author.into_inner()) {
             Ok(_) => Ok(Json(())),
-            Err(e) => Err(Json(ApiResponse {
-                code: 500,
-                message: e.to_string(),
-            })),
+            Err(e) => {
+                Err(status::Custom(Status::InternalServerError, e.to_string()))
+            }
         }
     }
 
@@ -156,10 +146,7 @@ mod author {
             Ok(val) => {
                 json_val_or_error!(alexandria::get_author(connector, val))
             }
-            Err(e) => Err(Json(ApiResponse {
-                code: 406,
-                message: e.to_string(),
-            })),
+            Err(e) => Err(status::Custom(Status::NotAcceptable, e.to_string())),
         }
     }
 
@@ -174,10 +161,7 @@ mod author {
             Ok(val) => {
                 json_val_or_error!(alexandria::delete_author(connector, val))
             }
-            Err(e) => Err(Json(ApiResponse {
-                code: 406,
-                message: e.to_string(),
-            })),
+            Err(e) => Err(status::Custom(Status::BadRequest, e.to_string())),
         }
     }
 }
@@ -185,8 +169,10 @@ mod author {
 mod book {
     use std::str::FromStr;
 
-    use crate::{ApiKey, ApiResponse, Json, JsonResponse, ServerState};
+    use crate::{ApiKey, Json, JsonResponse, ServerState};
     use alexandria::models::Book;
+    use rocket::http::Status;
+    use rocket::response::status;
     use rocket::{log::private::info, State};
 
     use uuid::Uuid;
@@ -200,10 +186,9 @@ mod book {
         let connector = &mut db.pool.get().unwrap();
         match alexandria::new_book(connector, book.into_inner()) {
             Ok(_) => Ok(Json(())),
-            Err(e) => Err(Json(ApiResponse {
-                code: 500,
-                message: e.to_string(),
-            })),
+            Err(e) => {
+                Err(status::Custom(Status::InternalServerError, e.to_string()))
+            }
         }
     }
 
@@ -220,10 +205,7 @@ mod book {
         let connector = &mut db.pool.get().unwrap();
         match Uuid::from_str(&id) {
             Ok(id) => json_val_or_error!(alexandria::get_book(connector, id)),
-            Err(e) => Err(Json(ApiResponse {
-                code: 406,
-                message: e.to_string(),
-            })),
+            Err(e) => Err(status::Custom(Status::BadRequest, e.to_string())),
         }
     }
 
@@ -238,10 +220,7 @@ mod book {
             Ok(id) => {
                 json_val_or_error!(alexandria::delete_book(connector, id))
             }
-            Err(e) => Err(Json(ApiResponse {
-                code: 406,
-                message: e.to_string(),
-            })),
+            Err(e) => Err(status::Custom(Status::BadRequest, e.to_string())),
         }
     }
 }
