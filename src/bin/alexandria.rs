@@ -128,6 +128,21 @@ mod author {
         }
     }
 
+    #[put("/", format = "json", data = "<author>")]
+    pub fn update(
+        author: Json<Author>,
+        db: &State<ServerState>,
+    ) -> JsonResponse<()> {
+        let connector = &mut db.pool.get().unwrap();
+        match alexandria::update_author(connector, author.into_inner()) {
+            Ok(_) => Ok(Json(())),
+            Err(e) => Err(Json(ApiResponse {
+                code: 500,
+                message: e.to_string(),
+            })),
+        }
+    }
+
     #[get("/")]
     pub fn list(db: &State<ServerState>) -> JsonResponse<Vec<Author>> {
         let connector = &mut db.pool.get().unwrap();
@@ -222,7 +237,13 @@ fn rocket() -> _ {
     rocket::build()
         .mount(
             "/author",
-            routes![author::new, author::get, author::delete, author::list],
+            routes![
+                author::new,
+                author::update,
+                author::get,
+                author::delete,
+                author::list
+            ],
         )
         .mount("/book", routes![book::get, book::delete, book::list])
         .manage(ServerState {

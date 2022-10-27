@@ -58,6 +58,18 @@ pub fn new_author(
     insert_into(authors).values(author).execute(connector)
 }
 
+/// Update an author in the database
+///
+/// # Errors
+///
+/// If an error is returned by diesel, forward it to the function
+/// calling `update_author`
+pub fn update_author(connector: &mut PgConnection, author: Author) -> ApiResult<usize> {
+    use self::schema::authors::dsl::authors;
+    insert_into(authors).values(author).execute(connector)
+}
+
+
 /// Update an existing author in the database
 ///
 /// # Errors
