@@ -62,16 +62,9 @@ macro_rules! json_val_or_error {
     };
 }
 
-// * Book Fragment
-// - [ ] ~/book/:id/fragments~ GET
-// - [ ] ~/book/:id/fragments~ POST
-// - [ ] ~/book/:id/fragments/:rank~ GET
-// - [ ] ~/book/:id/fragments/:rank~ PUT
-// - [ ] ~/book/:id/fragments/:rank~ DELETE
-// - [ ] ~/book/:id/fragments/:rank/reorder~ PUT
-
 mod author;
 mod book;
+mod fragment;
 
 #[launch]
 fn rocket() -> _ {
@@ -90,8 +83,16 @@ fn rocket() -> _ {
         )
         .mount(
             "/book",
-            routes![book::new, book::get, book::delete, book::list],
+            routes![
+                book::new,
+                book::get,
+                book::delete,
+                book::list,
+                // Fragments
+                fragment::list
+            ],
         )
+        .mount("/fragment", routes![fragment::get])
         .manage(ServerState {
             pool: alexandria::utils::get_connection_pool(),
             api_key: env::var("ALEXANDRIA_ADMIN_KEY")

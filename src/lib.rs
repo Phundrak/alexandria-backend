@@ -6,3 +6,4 @@ pub mod schema;
 pub mod utils;
 pub mod author;
 pub mod book;
+pub mod fragment;

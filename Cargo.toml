@@ -22,4 +22,4 @@ rocket = { version = "0.5.0-rc.2", features = ["json", "uuid"] }
 color-eyre = "0.6.2"
 
 # parallel iterators
-# rayon = "1.5.3"
+rayon = "1.5.3"
