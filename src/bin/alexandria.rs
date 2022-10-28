@@ -92,7 +92,10 @@ fn rocket() -> _ {
                 fragment::list
             ],
         )
-        .mount("/fragment", routes![fragment::get])
+        .mount(
+            "/fragment",
+            routes![fragment::get, fragment::reorder, fragment::delete],
+        )
         .manage(ServerState {
             pool: alexandria::utils::get_connection_pool(),
             api_key: env::var("ALEXANDRIA_ADMIN_KEY")
