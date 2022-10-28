@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use crate::{ApiKey, Json, JsonResponse, ServerState};
 
 use alexandria::models::Author;
@@ -55,27 +53,17 @@ pub fn list(db: &State<ServerState>) -> JsonResponse<Vec<Author>> {
 }
 
 #[get("/<id>")]
-pub fn get(db: &State<ServerState>, id: String) -> JsonResponse<Author> {
+pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Author> {
     let connector = &mut db.pool.get().unwrap();
-    match Uuid::from_str(&id) {
-        Ok(val) => {
-            json_val_or_error!(alexandria::author::get(connector, val))
-        }
-        Err(e) => Err(status::Custom(Status::NotAcceptable, e.to_string())),
-    }
+    json_val_or_error!(alexandria::author::get(connector, id))
 }
 
 #[delete("/<id>")]
 pub fn delete(
     db: &State<ServerState>,
-    id: String,
+    id: Uuid,
     _key: ApiKey<'_>,
 ) -> JsonResponse<()> {
     let connector = &mut db.pool.get().unwrap();
-    match Uuid::from_str(&id) {
-        Ok(val) => {
-            json_val_or_error!(alexandria::author::delete(connector, val))
-        }
-        Err(e) => Err(status::Custom(Status::BadRequest, e.to_string())),
-    }
+    json_val_or_error!(alexandria::author::delete(connector, id))
 }

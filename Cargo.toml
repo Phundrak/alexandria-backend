@@ -16,7 +16,7 @@ chrono = { version = "0.4.22", features = ["serde"] }
 uuid = { version = "1.2.1", features = ["v4", "fast-rng", "macro-diagnostics", "serde" ] }
 
 # web server
-rocket = { version = "0.5.0-rc.2", features = ["json"] }
+rocket = { version = "0.5.0-rc.2", features = ["json", "uuid"] }
 
 # better error output
 color-eyre = "0.6.2"

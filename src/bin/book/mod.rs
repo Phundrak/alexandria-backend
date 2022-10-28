@@ -1,11 +1,10 @@
-use std::str::FromStr;
-
 use crate::{ApiKey, Json, JsonResponse, ServerState};
 
 use alexandria::models::Book;
 use rocket::http::Status;
 use rocket::response::status;
 use rocket::{log::private::info, State};
+use uuid::Uuid;
 
 // - [ ] ~/book~ POST
 // - [ ] ~/book~ PUT
@@ -16,8 +15,6 @@ use rocket::{log::private::info, State};
 // - [X] ~/books~ GET
 // - [ ] ~/books~ POST
 // - [ ] ~/books~ PUT
-
-use uuid::Uuid;
 
 #[post("/", format = "json", data = "<book>")]
 pub fn new(
@@ -42,26 +39,18 @@ pub fn list(db: &State<ServerState>) -> JsonResponse<Vec<Book>> {
 }
 
 #[get("/<id>")]
-pub fn get(db: &State<ServerState>, id: String) -> JsonResponse<Book> {
+pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Book> {
     info!("Retrieving book {}", id);
     let connector = &mut db.pool.get().unwrap();
-    match Uuid::from_str(&id) {
-        Ok(id) => json_val_or_error!(alexandria::book::get(connector, id)),
-        Err(e) => Err(status::Custom(Status::BadRequest, e.to_string())),
-    }
+    json_val_or_error!(alexandria::book::get(connector, id))
 }
 
 #[delete("/<id>")]
 pub fn delete(
     db: &State<ServerState>,
-    id: String,
+    id: Uuid,
     _key: ApiKey<'_>,
 ) -> JsonResponse<()> {
     let connector = &mut db.pool.get().unwrap();
-    match Uuid::from_str(&id) {
-        Ok(id) => {
-            json_val_or_error!(alexandria::book::delete(connector, id))
-        }
-        Err(e) => Err(status::Custom(Status::BadRequest, e.to_string())),
-    }
+    json_val_or_error!(alexandria::book::delete(connector, id))
 }
