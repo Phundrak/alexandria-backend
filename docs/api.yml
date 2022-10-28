@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: "This is the API for the augmented book project."
-  version: 0.3.0
+  version: 1.0.0
   title: Augmented Book
   termsOfService: https://phundrak.com/privacy
   contact:
@@ -381,7 +381,7 @@ paths:
       tags:
         - book fragments
       summary: Add a new fragment to a book
-      description: "Add a new fragment to an existing book. If the rank of the fragment is too high, it will simply be appended and the actual rank will be returned by the API."
+      description: "Add a new fragment to an existing book. If the rank of the fragment is too high, it will simply be appended and the actual rank will be returned by the API. If another fragment already exists at the same rank, treat this request as an insert and move the existing fragment and all the one step further."
       operationId: addNewBookFragment
       requestBody:
         $ref: "#/components/requestBodies/BookFragmentInsert"
