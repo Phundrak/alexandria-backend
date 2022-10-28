@@ -14,13 +14,6 @@ pub struct FragmentToRank {
     pub to: i32,
 }
 
-// - [X] ~/book/:id/fragments~ GET
-// - [ ] ~/fragment~ POST
-// - [X] ~/fragment/:id~ GET
-// - [ ] ~/fragment/:id~ PUT
-// - [X] ~/fragment/:id~ DELETE
-// - [X] ~/fragment/:id/reorder~ PUT
-
 #[get("/<book_id>/fragments")]
 pub fn list(
     db: &State<ServerState>,

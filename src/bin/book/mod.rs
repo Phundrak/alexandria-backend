@@ -6,16 +6,6 @@ use rocket::response::status;
 use rocket::{log::private::info, State};
 use uuid::Uuid;
 
-// - [ ] ~/book~ POST
-// - [ ] ~/book~ PUT
-// - [ ] ~/book/find~ GET
-// - [X] ~/book/:id~ GET
-// - [ ] ~/book/:id~ POST
-// - [X] ~/book/:id~ DELETE
-// - [X] ~/books~ GET
-// - [ ] ~/books~ POST
-// - [ ] ~/books~ PUT
-
 #[post("/", format = "json", data = "<book>")]
 pub fn new(
     book: Json<Book>,

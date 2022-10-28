@@ -35,3 +35,31 @@ cargo clippy
 
 ## REST API
 The specification of the REST API can be found in the file `docs/api.yml`
+
+### Currently implemented paths
+
+#### Author
+- [X] `/author` GET
+- [X] `/author` POST
+- [X] `/author` PUT
+- [ ] `/author/find` GET
+- [X] `/author/:id` GET
+- [ ] `/author/:id` PUT
+- [X] `/author/:id` DELETE
+
+#### Book
+- [X] `/book` GET
+- [ ] `/book` POST
+- [ ] `/book` PUT
+- [ ] `/book/find` GET
+- [X] `/book/:id` GET
+- [ ] `/book/:id` PUT
+- [X] `/book/:id` DELETE
+
+#### Fragments
+- [X] `/book/:id/fragments` GET
+- [ ] `/fragment` POST
+- [X] `/fragment/:id` GET
+- [ ] `/fragment/:id` PUT
+- [X] `/fragment/:id` DELETE
+- [X] `/fragment/:id/reorder` PUT

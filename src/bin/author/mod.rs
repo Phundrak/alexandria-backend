@@ -6,17 +6,6 @@ use rocket::response::status;
 use rocket::{log::private::info, State};
 use uuid::Uuid;
 
-// - [X] ~/author~ POST
-// - [X] ~/author~ PUT
-// - [ ] ~/author/find~ GET
-// - [ ] ~/author/findByLastName~ GET
-// - [X] ~/author/:id~ GET
-// - [ ] ~/author/:id~ POST
-// - [X] ~/author/:id~ DELETE
-// - [X] ~/authors~ GET
-// - [ ] ~/authors~ POST
-// - [ ] ~/authors~ PUT
-
 #[post("/", format = "json", data = "<author>")]
 pub fn new(
     author: Json<Author>,
