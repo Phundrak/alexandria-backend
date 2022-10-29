@@ -158,27 +158,20 @@ pub fn move_frag(
 /// calling `new`
 pub fn new(
     connector: &mut PgConnection,
-    fragment: &Bookfragment,
-) -> ApiResult<()> {
-    match bookfragments::dsl::bookfragments
+    fragment: Bookfragment,
+) -> ApiResult<usize> {
+    let book_fragments = bookfragments::dsl::bookfragments
         .filter(bookfragments::dsl::book.eq(fragment.book))
-        .load::<Bookfragment>(connector)
-    {
-        Ok(val) => {
-            if !val.is_empty() {
-                shift_fragments(
-                    connector,
-                    fragment.book,
-                    fragment.rank,
-                    None,
-                    None,
-                )?;
-            }
-        }
-        Err(e) => return Err(e),
-    };
-
-    Ok(())
+        .load::<Bookfragment>(connector)?;
+    // Check if there is already a fragment with the same rank.
+    // If yes, shift the existing fragments in order to place the new
+    // fragment
+    if !book_fragments.is_empty() {
+        shift_fragments(connector, fragment.book, fragment.rank, None, None)?;
+    }
+    diesel::insert_into(dsl::bookfragments)
+        .values(fragment)
+        .execute(connector)
 }
 
 /// Delete a book fragment
