@@ -104,6 +104,30 @@ pub fn new(
     }
 }
 
+/// Update an existing fragment
+///
+/// In case the fragment’s rank changes, shift all the necessary
+/// fragments to keep continuity in the book, see `new`.
+///
+/// # Errors
+///
+/// If an internal error happens, return a 500 error to the user.
+/// Otherwise, send an array of books in Json format.
+// TODO: Handle fragment not found
+#[put("/", format = "json", data = "<fragment>")]
+pub fn update(
+    db: &State<ServerState>,
+    fragment: Json<Bookfragment>,
+) -> JsonResponse<()> {
+    let connector = &mut get_connector!(db);
+    match alexandria::fragment::update(connector, fragment.into_inner()) {
+        Ok(_) => Ok(Json(())),
+        Err(e) => {
+            Err(status::Custom(Status::InternalServerError, e.to_string()))
+        }
+    }
+}
+
 /// Delete a fragment by ID
 ///
 /// # Errors
@@ -140,7 +164,7 @@ pub fn reorder(
     _key: ApiKey<'_>,
 ) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
-    match alexandria::fragment::move_frag(connector, id, to.to) {
+    match alexandria::fragment::move_frag_id(connector, id, to.to) {
         Ok(_) => Ok(Json(())),
         Err(e) => {
             Err(status::Custom(Status::InternalServerError, e.to_string()))

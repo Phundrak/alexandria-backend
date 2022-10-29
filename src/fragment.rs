@@ -123,7 +123,7 @@ pub fn shift_fragments(
 /// shifted or a diesel [`Error`].
 ///
 /// [`Error`]: ../../diesel/result/enum.Error.html
-pub fn move_frag(
+pub fn move_frag_id(
     connector: &mut PgConnection,
     fragment: Uuid,
     to: i32,
@@ -171,6 +171,30 @@ pub fn new(
     }
     diesel::insert_into(dsl::bookfragments)
         .values(fragment)
+        .execute(connector)
+}
+
+/// Update a fragment
+///
+/// As with new fragments, if the current fragment’s rank has changed,
+/// shift the necessary fragments.
+///
+/// # Errors
+///
+/// If an error is returned by diesel, forward it to the function
+/// calling `delete`
+pub fn update(connector: &mut PgConnection, fragment: Bookfragment) -> ApiResult<usize> {
+    let book_fragments = dsl::bookfragments
+        .filter(dsl::rank.eq(fragment.rank))
+        .filter(dsl::id.ne(fragment.id))
+        .load::<Bookfragment>(connector)?;
+    // Move the fragment before updating it
+    // TODO: Check if the fragment exists first
+    if book_fragments.len() > 1 {
+        move_frag_id(connector, fragment.id, fragment.rank)?;
+    };
+    diesel::update(dsl::bookfragments)
+        .set(fragment)
         .execute(connector)
 }
 

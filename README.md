@@ -57,7 +57,7 @@ The specification of the REST API can be found in the file `docs/api.yml`
 #### Fragments
 - [X] `/book/:id/fragments` GET
 - [X] `/fragment` POST
-- [ ] `/fragment` PUT
+- [X] `/fragment` PUT
 - [X] `/fragment/:id` GET
 - [X] `/fragment/:id` DELETE
 - [X] `/fragment/:id/reorder` PUT
