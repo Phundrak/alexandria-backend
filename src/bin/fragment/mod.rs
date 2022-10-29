@@ -10,7 +10,7 @@ use rocket::{log::private::info, State};
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct FragmentToRank {
+pub struct ToRank {
     pub to: i32,
 }
 
@@ -19,19 +19,19 @@ pub fn list(
     db: &State<ServerState>,
     book_id: Uuid,
 ) -> JsonResponse<Vec<fragment::Simple>> {
-    let connector = &mut db.pool.get().unwrap();
+    let connector = &mut get_connector!(db);
     json_val_or_error!(alexandria::fragment::list(connector, book_id))
 }
 
 #[get("/<id>")]
 pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Bookfragment> {
-    let connector = &mut db.pool.get().unwrap();
+    let connector = &mut get_connector!(db);
     json_val_or_error!(alexandria::fragment::get(connector, id))
 }
 
 #[delete("/<id>")]
 pub fn delete(db: &State<ServerState>, id: Uuid, _key: ApiKey<'_>) -> JsonResponse<()> {
-    let connector = &mut db.pool.get().unwrap();
+    let connector = &mut get_connector!(db);
     json_val_or_error!(alexandria::fragment::delete(connector, id))
 }
 
@@ -40,10 +40,10 @@ pub fn delete(db: &State<ServerState>, id: Uuid, _key: ApiKey<'_>) -> JsonRespon
 pub fn reorder(
     db: &State<ServerState>,
     id: Uuid,
-    to: Json<FragmentToRank>,
+    to: Json<ToRank>,
     _key: ApiKey<'_>,
 ) -> JsonResponse<()> {
-    let connector = &mut db.pool.get().unwrap();
+    let connector = &mut get_connector!(db);
     match alexandria::fragment::move_frag(connector, id, to.to) {
         Ok(_) => Ok(Json(())),
         Err(e) => {

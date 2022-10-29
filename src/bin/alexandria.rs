@@ -1,3 +1,6 @@
+#![warn(clippy::style, clippy::pedantic)]
+#![allow(clippy::no_effect_underscore_binding, clippy::needless_pass_by_value)]
+
 #[macro_use]
 extern crate rocket;
 use diesel::pg::PgConnection;
@@ -9,6 +12,21 @@ use rocket::response::status;
 use rocket::serde::json::Json;
 use std::env;
 
+macro_rules! get_connector {
+    ($db:expr) => {
+        match $db.pool.get() {
+            Ok(val) => val,
+            Err(_) => {
+                return Err(status::Custom(
+                    Status::InternalServerError,
+                    "Failed to connect to the database".to_owned(),
+                ));
+            }
+        }
+    };
+}
+
+#[derive(Copy, Clone)]
 pub struct ApiKey<'r>(&'r str);
 
 #[derive(Debug)]
@@ -62,9 +80,9 @@ macro_rules! json_val_or_error {
     };
 }
 
-mod author;
-mod book;
-mod fragment;
+pub mod author;
+pub mod book;
+pub mod fragment;
 
 #[launch]
 fn rocket() -> _ {
@@ -96,7 +114,11 @@ fn rocket() -> _ {
         )
         .mount(
             "/fragment",
-            routes![fragment::get, fragment::reorder, fragment::delete],
+            routes![
+                fragment::get,     // /:id         GET
+                fragment::delete,  // /:id         DELETE
+                fragment::reorder, // /:id/reorder PUT
+            ],
         )
         .manage(ServerState {
             pool: alexandria::utils::get_connection_pool(),
