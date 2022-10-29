@@ -84,12 +84,13 @@ fn rocket() -> _ {
         .mount(
             "/book",
             routes![
-                book::new,
-                book::get,
-                book::delete,
-                book::list,
+                book::list,   // /     GET
+                book::new,    // /     POST
+                book::find,   // /find GET
+                book::get,    // /:id  GET
+                book::delete, // /:id  DELETE
                 // Fragments
-                fragment::list
+                fragment::list // /:id/fragments GET
             ],
         )
         .mount(

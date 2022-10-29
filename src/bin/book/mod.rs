@@ -6,6 +6,13 @@ use rocket::response::status;
 use rocket::{log::private::info, State};
 use uuid::Uuid;
 
+#[get("/")]
+pub fn list(db: &State<ServerState>) -> JsonResponse<Vec<Book>> {
+    info!("Listing books");
+    let connector = &mut db.pool.get().unwrap();
+    json_val_or_error!(alexandria::book::list(connector))
+}
+
 #[post("/", format = "json", data = "<book>")]
 pub fn new(
     book: Json<Book>,
@@ -21,12 +28,12 @@ pub fn new(
     }
 }
 
-#[get("/")]
-pub fn list(db: &State<ServerState>) -> JsonResponse<Vec<Book>> {
-    info!("Listing books");
+#[get("/find?<name>")]
+pub fn find(db: &State<ServerState>, name: String) -> JsonResponse<Vec<Book>> {
     let connector = &mut db.pool.get().unwrap();
-    json_val_or_error!(alexandria::book::list(connector))
+    json_val_or_error!(alexandria::book::find(connector, &name))
 }
+
 
 #[get("/<id>")]
 pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Book> {
