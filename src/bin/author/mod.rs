@@ -9,13 +9,13 @@ use uuid::Uuid;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(crate = "rocket::serde")]
-pub struct UserInput<'r> {
-    pub firstname: Option<&'r str>,
-    pub lastname: Option<&'r str>,
-    pub penname: Option<&'r str>,
+pub struct UserInput {
+    pub firstname: Option<String>,
+    pub lastname: Option<String>,
+    pub penname: Option<String>,
 }
 
-impl<'r> UserInput<'r> {
+impl UserInput {
     fn is_valid(&self) -> bool {
         !(self.firstname.is_none()
             && self.lastname.is_none()
@@ -23,13 +23,15 @@ impl<'r> UserInput<'r> {
     }
 }
 
-macro_rules! str_to_string_or_none {
-    ($val:expr) => {
-        match $val {
-            Some(val) => Some(val.to_string()),
-            None => None,
+impl From<UserInput> for Author {
+    fn from(other: UserInput) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            firstname: other.firstname,
+            lastname: other.lastname,
+            penname: other.penname,
         }
-    };
+    }
 }
 
 /// List all authors in the database
@@ -63,7 +65,7 @@ pub fn new(
     _key: ApiKey<'_>,
 ) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
-    let author = author.clone().into_inner();
+    let author = author.into_inner();
     if !author.is_valid() {
         return Err(status::Custom(
             Status::NotAcceptable,
@@ -72,9 +74,9 @@ pub fn new(
     }
     let new_author = Author {
         id: Uuid::new_v4(),
-        penname: str_to_string_or_none!(&author.penname),
-        firstname: str_to_string_or_none!(&author.firstname),
-        lastname: str_to_string_or_none!(&author.lastname),
+        penname: author.penname,
+        firstname: author.firstname,
+        lastname: author.lastname,
     };
     match alexandria::author::new(connector, new_author) {
         Ok(_) => Ok(Json(())),
