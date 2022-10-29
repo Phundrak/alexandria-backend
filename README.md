@@ -49,9 +49,9 @@ The specification of the REST API can be found in the file `docs/api.yml`
 
 #### Book
 - [X] `/book` GET
-- [ ] `/book` POST
+- [X] `/book` POST
 - [ ] `/book` PUT
-- [ ] `/book/find` GET
+- [X] `/book/find` GET
 - [X] `/book/:id` GET
 - [ ] `/book/:id` PUT
 - [X] `/book/:id` DELETE
