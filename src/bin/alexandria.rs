@@ -74,11 +74,12 @@ fn rocket() -> _ {
         .mount(
             "/author",
             routes![
-                author::new,
-                author::update,
-                author::get,
-                author::delete,
-                author::list
+                author::list,   // /     GET
+                author::new,    // /     POST
+                author::update, // /     PUT
+                author::find,   // /find GET
+                author::get,    // /:id  GET
+                author::delete, // /:id  DELETE
             ],
         )
         .mount(

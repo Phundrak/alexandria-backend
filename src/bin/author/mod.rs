@@ -41,6 +41,12 @@ pub fn list(db: &State<ServerState>) -> JsonResponse<Vec<Author>> {
     json_val_or_error!(alexandria::author::list(connector))
 }
 
+#[get("/find?<name>")]
+pub fn find(db: &State<ServerState>, name: String) -> JsonResponse<Vec<Author>> {
+    let connector = &mut db.pool.get().unwrap();
+    json_val_or_error!(alexandria::author::find(connector, &name))
+}
+
 #[get("/<id>")]
 pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Author> {
     let connector = &mut db.pool.get().unwrap();

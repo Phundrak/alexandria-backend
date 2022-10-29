@@ -42,7 +42,7 @@ The specification of the REST API can be found in the file `docs/api.yml`
 - [X] `/author` GET
 - [X] `/author` POST
 - [X] `/author` PUT
-- [ ] `/author/find` GET
+- [X] `/author/find` GET
 - [X] `/author/:id` GET
 - [ ] `/author/:id` PUT
 - [X] `/author/:id` DELETE
