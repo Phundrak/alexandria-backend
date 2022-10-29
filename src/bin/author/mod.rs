@@ -72,13 +72,7 @@ pub fn new(
             format!("At least one field must be full. Received {:?}", author),
         ));
     }
-    let new_author = Author {
-        id: Uuid::new_v4(),
-        penname: author.penname,
-        firstname: author.firstname,
-        lastname: author.lastname,
-    };
-    match alexandria::author::new(connector, new_author) {
+    match alexandria::author::new(connector, author.into()) {
         Ok(_) => Ok(Json(())),
         Err(e) => {
             Err(status::Custom(Status::InternalServerError, e.to_string()))
