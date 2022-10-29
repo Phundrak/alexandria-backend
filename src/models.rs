@@ -1,4 +1,4 @@
-use diesel::prelude::{Insertable, Queryable};
+use diesel::{prelude::{Insertable, Queryable}, AsChangeset};
 use rocket::serde::{Deserialize, Serialize};
 
 use uuid::Uuid;
@@ -15,7 +15,7 @@ use crate::schema::{authors, bookfragments, books};
 /// All of them except the identifier can be null. However, the pen
 /// name must be set if the first and last names aren’t, and vice
 /// versa.
-#[derive(Queryable, Deserialize, Serialize, Insertable, Clone)]
+#[derive(Queryable, Deserialize, Serialize, Insertable, Clone, AsChangeset)]
 #[serde(crate = "rocket::serde")]
 pub struct Author {
     pub id: Uuid,
@@ -51,7 +51,7 @@ pub enum BookType {
 /// - The type of book it is (see [`BookType`])
 ///
 /// [`BookType`]: ./enum.BookType.html
-#[derive(Queryable, Deserialize, Serialize, Insertable, Clone)]
+#[derive(Queryable, Deserialize, Serialize, Insertable, Clone, AsChangeset)]
 #[serde(crate = "rocket::serde")]
 pub struct Book {
     pub id: Uuid,
@@ -131,7 +131,7 @@ pub enum SoundType {
 /// [`ImageType`]: ./enum.ImageType.html
 /// [`SoundType`]: ./enum.SoundType.html
 /// [`Book`]: ./struct.Book.html
-#[derive(Queryable, Deserialize, Serialize, Insertable, Clone)]
+#[derive(Queryable, Deserialize, Serialize, Insertable, Clone, AsChangeset)]
 #[serde(crate = "rocket::serde")]
 pub struct Bookfragment {
     pub id: Uuid,

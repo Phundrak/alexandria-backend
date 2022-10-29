@@ -38,6 +38,18 @@ pub fn get(connector: &mut PgConnection, identifier: Uuid) -> ApiResult<Book> {
     dsl::books.find(identifier).first(connector)
 }
 
+/// Update a book
+///
+/// # Errors
+///
+/// If an error is returned by diesel, forward it to the function
+/// calling `get`
+pub fn update(connector: &mut PgConnection, book: Book) -> ApiResult<usize> {
+    diesel::update(dsl::books)
+        .set(book)
+        .execute(connector)
+}
+
 /// Find a book by title
 ///
 /// Find a book whose title contains `name`. May not work with typos

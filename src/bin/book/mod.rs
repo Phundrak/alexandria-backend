@@ -74,6 +74,40 @@ pub fn new(
     }
 }
 
+/// Update a book
+///
+/// # Errors
+///
+/// Any error from the server will be returned to the user as a 500
+/// HTTP error.
+// TODO: Handle book not found
+#[put("/", format = "json", data = "<book>")]
+pub fn update(book: Json<Book>, db: &State<ServerState>) -> JsonResponse<()> {
+    let connector = &mut get_connector!(db);
+    let book = book.into_inner();
+    let id = book.id;
+    match alexandria::book::update(connector, book) {
+        Ok(val) => {
+            if val == 1 {
+                Ok(Json(()))
+            } else if val == 0 {
+                Err(status::Custom(
+                    Status::NotFound,
+                    format!("Book with ID {} not found", id),
+                ))
+            } else {
+                Err(
+                    status::Custom(
+                        Status::InternalServerError,
+                        format!("Something went horribly wrong, {} books affected. Please report this as a bug", val)))
+            }
+        }
+        Err(e) => {
+            Err(status::Custom(Status::InternalServerError, e.to_string()))
+        }
+    }
+}
+
 /// Find books matching the title `name`
 ///
 /// Return in a vector all books whose title contain `name`. Typos are
