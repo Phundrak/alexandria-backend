@@ -86,6 +86,13 @@ pub fn new(
     }
 }
 
+/// Update an existing author
+///
+/// # Errors
+///
+/// Any error from the server will be returned to the user as a 500
+/// HTTP error.
+// TODO: Handle author not found
 #[put("/", format = "json", data = "<author>")]
 pub fn update(
     author: Json<Author>,
@@ -100,6 +107,14 @@ pub fn update(
     }
 }
 
+/// Find an author by name
+///
+/// May not work with full names and typos.
+///
+/// # Errors
+///
+/// Any error from the server will be returned to the user as a 500
+/// HTTP error.
 #[get("/find?<name>")]
 pub fn find(
     db: &State<ServerState>,
@@ -109,12 +124,26 @@ pub fn find(
     json_val_or_error!(alexandria::author::find(connector, &name))
 }
 
+/// Get an author by ID.
+///
+/// # Errors
+///
+/// Any error from the server will be returned to the user as a 500
+/// HTTP error.
+// TODO: Handle author not found
 #[get("/<id>")]
 pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Author> {
     let connector = &mut get_connector!(db);
     json_val_or_error!(alexandria::author::get(connector, id))
 }
 
+/// Delete an author
+///
+/// # Errors
+///
+/// Any error from the server will be returned to the user as a 500
+/// HTTP error.
+// TODO: Handle author not found
 #[delete("/<id>")]
 pub fn delete(
     db: &State<ServerState>,
