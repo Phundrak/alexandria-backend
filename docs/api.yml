@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: "This is the API for the augmented book project."
-  version: 1.0.0
+  version: 0.4.0
   title: Augmented Book
   termsOfService: https://phundrak.com/privacy
   contact:
@@ -124,30 +124,6 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Author not found
-    put:
-      tags:
-        - author
-      summary: Updates a author in the library with form data
-      operationId: updateAuthorById
-      parameters:
-        - name: api_key
-          in: header
-          required: false
-          schema:
-            type: string
-        - name: authorId
-          in: path
-          description: ID of author that needs to be updated
-          required: true
-          schema:
-            type: string
-      requestBody:
-        $ref: "#/components/requestBodies/Author"
-      responses:
-        "200":
-          description: Successful operation
-        "405":
-          description: Invalid input
     delete:
       tags:
         - author
@@ -307,30 +283,6 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Book not found
-    put:
-      tags:
-        - book
-      summary: Updates a book in the library with form data
-      operationId: updateBookWithFormData
-      parameters:
-        - name: api_key
-          in: header
-          required: false
-          schema:
-            type: string
-        - name: bookId
-          in: path
-          description: ID of book that needs to be updated
-          required: true
-          schema:
-            type: string
-      requestBody:
-        $ref: "#/components/requestBodies/Book"
-      responses:
-        "200":
-          description: Successful operation
-        "405":
-          description: Invalid input
     delete:
       tags:
         - book
@@ -400,27 +352,6 @@ paths:
                     example: 6
         "405":
           description: Invalid input
-  "/fragment/{id}":
-    get:
-      tags:
-        - book fragments
-      summary: Get single book fragment
-      description: Returns a single fragment of a specific book
-      operationId: getSingleBookFragment
-      parameters:
-        - name: id
-          in: path
-          description: Id of the fragment to return
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/BookFragment"
     put:
       tags:
         - book fragments
@@ -433,12 +364,6 @@ paths:
           required: false
           schema:
             type: string
-        - name: id
-          in: path
-          description: Id of the fragment to return
-          required: true
-          schema:
-            type: integer
       requestBody:
         $ref: "#/components/requestBodies/BookFragment"
       responses:
@@ -460,6 +385,27 @@ paths:
           description: Book fragment not found
         "405":
           description: Validation exception
+  "/fragment/{id}":
+    get:
+      tags:
+        - book fragments
+      summary: Get single book fragment
+      description: Returns a single fragment of a specific book
+      operationId: getSingleBookFragment
+      parameters:
+        - name: id
+          in: path
+          description: Id of the fragment to return
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookFragment"
     delete:
       tags:
         - book fragments
