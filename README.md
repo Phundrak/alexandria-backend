@@ -27,9 +27,20 @@ You will first need to set up the database. For that, install `diesel`:
 cargo install diesel_cli
 ```
 
-You can now run the migrations in order to prepare PostgreSQL:
+You can now run the migrations in order to prepare PostgreSQL. Note
+that your PostgreSQL instance must be running.
+
 ```shell
 diesel migration run
+```
+
+In case PostgreSQL isn’t already running, you can run it in Docker
+with the provided `docker-compose.yml`:
+
+```shell
+docker-compose up -d
+# to turn it off:
+docker-compose down
 ```
 
 You can now run the server:
@@ -45,7 +56,8 @@ cargo clippy
 ```
 
 ## REST API
-The specification of the REST API can be found in the file `docs/api.yml`
+The specification of the REST API can be found in the file
+`docs/api.yml`
 
 ### Currently implemented paths
 
