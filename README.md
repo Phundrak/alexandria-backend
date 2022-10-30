@@ -22,10 +22,21 @@ cargo build --release
 ```
 
 ### Run the project
+You will first need to set up the database. For that, install `diesel`:
 ```shell
-cargo run --bin server
+cargo install diesel_cli
+```
+
+You can now run the migrations in order to prepare PostgreSQL:
+```shell
+diesel migration run
+```
+
+You can now run the server:
+```shell
+cargo run
 # or
-cargo run --bin server --release
+cargo run --release
 ```
 
 ### Lint

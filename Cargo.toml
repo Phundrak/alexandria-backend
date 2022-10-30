@@ -2,6 +2,11 @@
 name = "alexandria"
 version = "0.1.0"
 edition = "2021"
+authors = ["Lucien Cartier-Tilet <lucien@phundrak.com>"]
+description = "A backend for augmented books"
+repository = "https://github.com/Livre-Augmente-P8/alexandria"
+license = "GPL-3.0"
+publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
