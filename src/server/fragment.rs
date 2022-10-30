@@ -1,6 +1,6 @@
 use crate::{ApiKey, Json, JsonResponse, ServerState};
 
-use alexandria::fragment;
+use alexandria::db::fragment;
 use alexandria::models::{Bookfragment, ImageType, SoundType};
 use rocket::http::Status;
 use rocket::response::status;
@@ -60,7 +60,7 @@ pub fn list(
     book_id: Uuid,
 ) -> JsonResponse<Vec<fragment::Simple>> {
     let connector = &mut get_connector!(db);
-    json_val_or_error!(alexandria::fragment::list(connector, book_id))
+    json_val_or_error!(fragment::list(connector, book_id))
 }
 
 /// Get a fragment by ID
@@ -73,7 +73,7 @@ pub fn list(
 #[get("/<id>")]
 pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Bookfragment> {
     let connector = &mut get_connector!(db);
-    json_val_or_error!(alexandria::fragment::get(connector, id))
+    json_val_or_error!(fragment::get(connector, id))
 }
 
 /// Create a new fragment
@@ -96,7 +96,7 @@ pub fn new(
     fragment: Json<UserInput>,
 ) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
-    match alexandria::fragment::new(connector, fragment.into_inner().into()) {
+    match fragment::new(connector, fragment.into_inner().into()) {
         Ok(_) => Ok(Json(())),
         Err(e) => {
             Err(status::Custom(Status::InternalServerError, e.to_string()))
@@ -120,7 +120,7 @@ pub fn update(
     fragment: Json<Bookfragment>,
 ) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
-    match alexandria::fragment::update(connector, fragment.into_inner()) {
+    match fragment::update(connector, fragment.into_inner()) {
         Ok(_) => Ok(Json(())),
         Err(e) => {
             Err(status::Custom(Status::InternalServerError, e.to_string()))
@@ -142,7 +142,7 @@ pub fn delete(
     _key: ApiKey<'_>,
 ) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
-    json_val_or_error!(alexandria::fragment::delete(connector, id))
+    json_val_or_error!(fragment::delete(connector, id))
 }
 
 /// Reorder a book fragment
@@ -164,7 +164,7 @@ pub fn reorder(
     _key: ApiKey<'_>,
 ) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
-    match alexandria::fragment::move_frag_id(connector, id, to.to) {
+    match fragment::move_frag_id(connector, id, to.to) {
         Ok(_) => Ok(Json(())),
         Err(e) => {
             Err(status::Custom(Status::InternalServerError, e.to_string()))

@@ -7,7 +7,7 @@ use rocket::serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::schema::bookfragments::{self, dsl};
-use crate::{models::Bookfragment, utils::ApiResult};
+use crate::{models::Bookfragment, db::ApiResult};
 
 #[derive(Serialize, Deserialize, Copy, Clone, Eq)]
 #[serde(crate = "rocket::serde")]

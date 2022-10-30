@@ -1,6 +1,7 @@
 use crate::{ApiKey, Json, JsonResponse, ServerState};
 
 use alexandria::models::Author;
+use alexandria::db::author;
 use rocket::http::Status;
 use rocket::response::status;
 use rocket::serde::Deserialize;
@@ -43,7 +44,7 @@ impl From<UserInput> for Author {
 #[get("/")]
 pub fn list(db: &State<ServerState>) -> JsonResponse<Vec<Author>> {
     let connector = &mut get_connector!(db);
-    json_val_or_error!(alexandria::author::list(connector))
+    json_val_or_error!(author::list(connector))
 }
 
 /// Create a new author
@@ -72,7 +73,7 @@ pub fn new(
             format!("At least one field must be full. Received {:?}", author),
         ));
     }
-    match alexandria::author::new(connector, author.into()) {
+    match author::new(connector, author.into()) {
         Ok(_) => Ok(Json(())),
         Err(e) => {
             Err(status::Custom(Status::InternalServerError, e.to_string()))
@@ -93,7 +94,7 @@ pub fn update(
     db: &State<ServerState>,
 ) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
-    match alexandria::author::update(connector, author.into_inner()) {
+    match author::update(connector, author.into_inner()) {
         Ok(_) => Ok(Json(())),
         Err(e) => {
             Err(status::Custom(Status::InternalServerError, e.to_string()))
@@ -115,7 +116,7 @@ pub fn find(
     name: String,
 ) -> JsonResponse<Vec<Author>> {
     let connector = &mut get_connector!(db);
-    json_val_or_error!(alexandria::author::find(connector, &name))
+    json_val_or_error!(author::find(connector, &name))
 }
 
 /// Get an author by ID.
@@ -128,7 +129,7 @@ pub fn find(
 #[get("/<id>")]
 pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Author> {
     let connector = &mut get_connector!(db);
-    json_val_or_error!(alexandria::author::get(connector, id))
+    json_val_or_error!(author::get(connector, id))
 }
 
 /// Delete an author
@@ -145,5 +146,5 @@ pub fn delete(
     _key: ApiKey<'_>,
 ) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
-    json_val_or_error!(alexandria::author::delete(connector, id))
+    json_val_or_error!(author::delete(connector, id))
 }

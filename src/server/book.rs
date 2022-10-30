@@ -1,6 +1,7 @@
 use crate::{ApiKey, Json, JsonResponse, ServerState};
 
 use alexandria::models::{Book, BookType};
+use alexandria::db::book;
 use rocket::http::Status;
 use rocket::response::status;
 use rocket::serde::Deserialize;
@@ -49,7 +50,7 @@ impl From<UserInput> for Book {
 pub fn list(db: &State<ServerState>) -> JsonResponse<Vec<Book>> {
     info!("Listing books");
     let connector = &mut get_connector!(db);
-    json_val_or_error!(alexandria::book::list(connector))
+    json_val_or_error!(book::list(connector))
 }
 
 /// Create a new book.
@@ -66,7 +67,7 @@ pub fn new(
     _key: ApiKey<'_>,
 ) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
-    match alexandria::book::new(connector, book.into_inner().into()) {
+    match book::new(connector, book.into_inner().into()) {
         Ok(_) => Ok(Json(())),
         Err(e) => {
             Err(status::Custom(Status::InternalServerError, e.to_string()))
@@ -86,7 +87,7 @@ pub fn update(book: Json<Book>, db: &State<ServerState>) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
     let book = book.into_inner();
     let id = book.id;
-    match alexandria::book::update(connector, book) {
+    match book::update(connector, book) {
         Ok(val) => {
             if val == 1 {
                 Ok(Json(()))
@@ -120,7 +121,7 @@ pub fn update(book: Json<Book>, db: &State<ServerState>) -> JsonResponse<()> {
 #[get("/find?<name>")]
 pub fn find(db: &State<ServerState>, name: String) -> JsonResponse<Vec<Book>> {
     let connector = &mut get_connector!(db);
-    json_val_or_error!(alexandria::book::find(connector, &name))
+    json_val_or_error!(book::find(connector, &name))
 }
 
 /// Get a book by its ID
@@ -134,7 +135,7 @@ pub fn find(db: &State<ServerState>, name: String) -> JsonResponse<Vec<Book>> {
 pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Book> {
     info!("Retrieving book {}", id);
     let connector = &mut get_connector!(db);
-    json_val_or_error!(alexandria::book::get(connector, id))
+    json_val_or_error!(book::get(connector, id))
 }
 
 /// Delete the book with a set ID
@@ -151,5 +152,5 @@ pub fn delete(
     _key: ApiKey<'_>,
 ) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
-    json_val_or_error!(alexandria::book::delete(connector, id))
+    json_val_or_error!(book::delete(connector, id))
 }

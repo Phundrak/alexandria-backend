@@ -80,9 +80,7 @@ macro_rules! json_val_or_error {
     };
 }
 
-pub mod author;
-pub mod book;
-pub mod fragment;
+pub mod server;
 
 #[launch]
 fn rocket() -> _ {
@@ -92,36 +90,36 @@ fn rocket() -> _ {
         .mount(
             "/author",
             routes![
-                author::list,   // /     GET
-                author::new,    // /     POST
-                author::update, // /     PUT
-                author::find,   // /find GET
-                author::get,    // /:id  GET
-                author::delete, // /:id  DELETE
+                server::author::list,   // /     GET
+                server::author::new,    // /     POST
+                server::author::update, // /     PUT
+                server::author::find,   // /find GET
+                server::author::get,    // /:id  GET
+                server::author::delete, // /:id  DELETE
             ],
         )
         .mount(
             "/book",
             routes![
-                book::list,   // /     GET
-                book::new,    // /     POST
-                book::find,   // /find GET
-                book::get,    // /:id  GET
-                book::delete, // /:id  DELETE
+                server::book::list,   // /     GET
+                server::book::new,    // /     POST
+                server::book::find,   // /find GET
+                server::book::get,    // /:id  GET
+                server::book::delete, // /:id  DELETE
                 // Fragments
-                fragment::list // /:id/fragments GET
+                server::fragment::list // /:id/fragments GET
             ],
         )
         .mount(
             "/fragment",
             routes![
-                fragment::get,     // /:id         GET
-                fragment::delete,  // /:id         DELETE
-                fragment::reorder, // /:id/reorder PUT
+                server::fragment::get,     // /:id         GET
+                server::fragment::delete,  // /:id         DELETE
+                server::fragment::reorder, // /:id/reorder PUT
             ],
         )
         .manage(ServerState {
-            pool: alexandria::utils::get_connection_pool(),
+            pool: alexandria::db::get_connection_pool(),
             api_key: env::var("ALEXANDRIA_ADMIN_KEY")
                 .expect("ALEXANDRIA_ADMIN_KEY must be set!"),
         })

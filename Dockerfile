@@ -1,8 +1,8 @@
-FROM rust:1.63
+FROM rust:1.64
 
 WORKDIR /usr/src/alexandria
 COPY . .
 
 RUN cargo install --path .
 
-CMD ["server"]
+CMD ["alexandria"]

@@ -3,7 +3,7 @@ use diesel::{PgConnection, PgTextExpressionMethods, QueryDsl, RunQueryDsl};
 use uuid::Uuid;
 
 use crate::schema::authors::dsl;
-use crate::{models::Author, utils::ApiResult};
+use crate::{models::Author, db::ApiResult};
 
 /// List authors in the database.
 ///

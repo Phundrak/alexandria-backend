@@ -4,7 +4,7 @@ use diesel::{
 use uuid::Uuid;
 
 use crate::schema::books::dsl;
-use crate::{models::Book, utils::ApiResult};
+use crate::{models::Book, db::ApiResult};
 
 /// Add a new book in the database
 ///
