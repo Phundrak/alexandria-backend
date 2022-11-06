@@ -6,11 +6,13 @@ extern crate rocket;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenvy::dotenv;
-use rocket::http::Status;
+use rocket::http::{Method, Status};
 use rocket::request::{FromRequest, Outcome, Request};
 use rocket::response::status;
 use rocket::serde::json::Json;
+use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use std::env;
+use std::error::Error;
 
 macro_rules! get_connector {
     ($db:expr) => {
@@ -82,11 +84,34 @@ macro_rules! json_val_or_error {
 
 pub mod server;
 
-#[launch]
-fn rocket() -> _ {
+fn make_cors(
+    allowed_origins: AllowedOrigins,
+) -> Result<rocket_cors::Cors, rocket_cors::Error> {
+    rocket_cors::CorsOptions {
+        allowed_origins,
+        allowed_methods: vec![Method::Get, Method::Post, Method::Delete]
+            .into_iter()
+            .map(From::from)
+            .collect(),
+        allowed_headers: AllowedHeaders::some(&["Authorization", "Accept"]),
+        allow_credentials: true,
+        ..Default::default()
+    }
+    .to_cors()
+}
+
+#[rocket::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     color_eyre::install().unwrap();
     dotenv().ok();
-    rocket::build()
+
+    // NOTE: Maybe handle allowed origins through an env variable?
+    let allowed_origins = AllowedOrigins::some_regex(&[".*"]);
+    let cors = make_cors(allowed_origins)?;
+
+    #[allow(clippy::let_underscore_drop)]
+    let _ = rocket::build()
+        .attach(cors)
         .mount(
             "/author",
             routes![
@@ -123,4 +148,7 @@ fn rocket() -> _ {
             api_key: env::var("ALEXANDRIA_ADMIN_KEY")
                 .expect("ALEXANDRIA_ADMIN_KEY must be set!"),
         })
+        .launch()
+        .await?;
+    Ok(())
 }
