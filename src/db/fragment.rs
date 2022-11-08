@@ -187,7 +187,7 @@ pub fn update(connector: &mut PgConnection, fragment: Bookfragment) -> ApiResult
     let original_frag = dsl::bookfragments.find(fragment.id).first::<Bookfragment>(connector)?;
     // Move the fragment if the update moves it
     if original_frag.rank != fragment.rank {
-        move_frag_id(connector, fragment.id, fragment.rank);
+        move_frag_id(connector, fragment.id, fragment.rank)?;
     }
     diesel::update(dsl::bookfragments.find(fragment.id))
         .set(fragment)
