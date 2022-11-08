@@ -52,8 +52,8 @@ impl From<UserInput> for Bookfragment {
 /// # Errors
 ///
 /// Any error from the server will be returned to the user as a 500
-/// HTTP error.
-// TODO: Handle book not found
+/// HTTP error. If the book pointed at by `book_id` does not exist, a
+/// simple empty list is returned.
 #[get("/<book_id>/fragments")]
 pub fn list(
     db: &State<ServerState>,
@@ -69,11 +69,25 @@ pub fn list(
 ///
 /// If an internal error happens, return a 500 error to the user.
 /// Otherwise, send an array of books in Json format.
-// TODO: Handle fragment not found
 #[get("/<id>")]
 pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Bookfragment> {
     let connector = &mut get_connector!(db);
-    json_val_or_error!(fragment::get(connector, id))
+    match fragment::get(connector, id) {
+        Ok(val) => Ok(Json(val)),
+        Err(e) => {
+            use diesel::result::Error::NotFound;
+            match e {
+                NotFound => server_error!(
+                    Status::NotFound,
+                    format!("Fragment with ID {} not found", id)
+                ),
+                other => server_error!(
+                    Status::InternalServerError,
+                    other.to_string()
+                ),
+            }
+        }
+    }
 }
 
 /// Create a new fragment
@@ -89,7 +103,6 @@ pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Bookfragment> {
 ///
 /// If an internal error happens, return a 500 error to the user.
 /// Otherwise, send an array of books in Json format.
-// TODO: Handle fragment not found
 #[post("/", format = "json", data = "<fragment>")]
 pub fn new(
     db: &State<ServerState>,
@@ -113,17 +126,28 @@ pub fn new(
 ///
 /// If an internal error happens, return a 500 error to the user.
 /// Otherwise, send an array of books in Json format.
-// TODO: Handle fragment not found
 #[put("/", format = "json", data = "<fragment>")]
 pub fn update(
     db: &State<ServerState>,
     fragment: Json<Bookfragment>,
 ) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
-    match fragment::update(connector, fragment.into_inner()) {
+    let fragment = fragment.into_inner();
+    let id = fragment.id;
+    match fragment::update(connector, fragment) {
         Ok(_) => Ok(Json(())),
         Err(e) => {
-            Err(status::Custom(Status::InternalServerError, e.to_string()))
+            use diesel::result::Error::NotFound;
+            match e {
+                NotFound => server_error!(
+                    Status::NotFound,
+                    format!("Fragment ID {} not found", id)
+                ),
+                other => server_error!(
+                    Status::InternalServerError,
+                    other.to_string()
+                ),
+            }
         }
     }
 }
@@ -155,7 +179,6 @@ pub fn delete(
 ///
 /// Any error from the server will be returned to the user as a 500
 /// HTTP error.
-// TODO: Handle fragment not found
 #[put("/<id>/reorder", format = "json", data = "<to>")]
 pub fn reorder(
     db: &State<ServerState>,
@@ -167,7 +190,17 @@ pub fn reorder(
     match fragment::move_frag_id(connector, id, to.to) {
         Ok(_) => Ok(Json(())),
         Err(e) => {
-            Err(status::Custom(Status::InternalServerError, e.to_string()))
+            use diesel::result::Error::NotFound;
+            match e {
+                NotFound => server_error!(
+                    Status::NotFound,
+                    format!("Fragment ID {} not found", id)
+                ),
+                other => server_error!(
+                    Status::InternalServerError,
+                    other.to_string()
+                ),
+            }
         }
     }
 }
