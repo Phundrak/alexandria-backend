@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: "This is the API for the augmented book project."
-  version: 0.4.0
+  version: 0.5.0
   title: Augmented Book
   termsOfService: https://phundrak.com/privacy
   contact:
@@ -40,13 +40,13 @@ paths:
       description: ""
       operationId: addNewAuthor
       parameters:
-        - name: api_key
+        - name: x-api-key
           in: header
           required: false
           schema:
             type: string
       requestBody:
-        $ref: "#/components/requestBodies/Author"
+        $ref: "#/components/requestBodies/SimpleAuthor"
       responses:
         "200":
           description: Successful operation
@@ -59,7 +59,7 @@ paths:
       description: ""
       operationId: updateExistingAuthor
       parameters:
-        - name: api_key
+        - name: x-api-key
           in: header
           required: false
           schema:
@@ -130,7 +130,7 @@ paths:
       summary: Deletes a author
       operationId: deleteAuthor
       parameters:
-        - name: api_key
+        - name: x-api-key
           in: header
           required: false
           schema:
@@ -173,13 +173,13 @@ paths:
       description: ""
       operationId: addNewBook
       parameters:
-        - name: api_key
+        - name: x-api-key
           in: header
           required: false
           schema:
             type: string
       requestBody:
-        $ref: "#/components/requestBodies/Book"
+        $ref: "#/components/requestBodies/NewBook"
       responses:
         "200":
           description: Successful operation
@@ -192,7 +192,7 @@ paths:
       description: ""
       operationId: updateExistingBook
       parameters:
-        - name: api_key
+        - name: x-api-key
           in: header
           required: false
           schema:
@@ -289,7 +289,7 @@ paths:
       summary: Deletes a book
       operationId: deleteBook
       parameters:
-        - name: api_key
+        - name: x-api-key
           in: header
           required: false
           schema:
@@ -359,7 +359,7 @@ paths:
       description: "Change the content of a book fragment or reorder it"
       operationId: updateExistingBookFragment
       parameters:
-        - name: api_key
+        - name: x-api-key
           in: header
           required: false
           schema:
@@ -412,7 +412,7 @@ paths:
       summary: Delete a fragment
       operationId: deleteFragment
       parameters:
-        - name: api_key
+        - name: x-api-key
           in: header
           required: false
           schema:
@@ -438,7 +438,7 @@ paths:
       description: Reorder a book fragment to the specified rank in the JSON body. If the target rank is too great, the fragment will be appended and the API will answer with the new rank.
       operationId: reorderFragment
       parameters:
-        - name: api_key
+        - name: x-api-key
           in: header
           required: false
           schema:
@@ -477,7 +477,7 @@ paths:
           description: Fragment not found
 
 servers:
-  - url: https://livre.phundrak.com/api/v1
+  - url: http://localhost:8000
 components:
   requestBodies:
     BookArray:
@@ -488,6 +488,13 @@ components:
             items:
               $ref: "#/components/schemas/Book"
       description: List of user object
+      required: true
+    SimpleAuthor:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleAuthor"
+      description: Simpler author object for creating new authors
       required: true
     Author:
       content:
@@ -501,6 +508,13 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/Book"
+      description: Book object that needs to be added to the library
+      required: true
+    NewBook:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NewBook"
       description: Book object that needs to be added to the library
       required: true
     BookFragment:
@@ -547,6 +561,18 @@ components:
               fragment:
                 $ref: "#/components/schemas/BookFragment"
   schemas:
+    SimpleAuthor:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: "John"
+        lastname:
+          type: string
+          example: "Tolkien"
+        penname:
+          type: string
+          example: "J.R.R. Tolkien"
     Author:
       type: object
       required:
@@ -561,7 +587,7 @@ components:
         lastName:
           type: string
           example: "Rubinstein"
-        alias:
+        penname:
           type: string
           example: "Lian Hearn"
     BookFragmentSimple:
@@ -576,7 +602,7 @@ components:
         rank:
           type: integer
           example: 23
-    BookFragment:
+    NewBookFragment:
       type: object
       required:
         - text
@@ -585,6 +611,51 @@ components:
         - bgSoundType
         - imageType
       properties:
+        book:
+          type: string
+          example: "lord-of-the-rings-two-towers-tolkien"
+        rank:
+          type: integer
+          example: 23
+        text:
+          type: string
+        oneShotSoundSource:
+          type: string
+          example: "https://s3.example.com/oneshot.mp3"
+        bgSoundType:
+          type: string
+          description: "What should be played"
+          enum:
+            - none
+            - same
+            - url
+        bgSoundSource:
+          type: string
+          example: "https://s3.example.com/bg.mp3"
+        imageType:
+          type: string
+          description: "What kind of image should be used"
+          enum:
+            - none
+            - same
+            - auto
+            - url
+        imageSource:
+          type: string
+          example: "https://s3.example.com/bg.jpg"
+    BookFragment:
+      type: object
+      required:
+        - text
+        - rank
+        - book
+        - bgSoundType
+        - imageType
+        - id
+      properties:
+        id:
+          type: string
+          example: "lotrtt-ch1-rank23"
         book:
           type: string
           example: "lord-of-the-rings-two-towers-tolkien"
@@ -627,7 +698,7 @@ components:
         id:
           type: string
           example: "lord-of-the-rings-two-towers-tolkien"
-        name:
+        title:
           type: string
           example: "Lord of the Rings: Two Towers"
         author:
@@ -661,15 +732,61 @@ components:
         synopsis:
           type: string
           example: "Frodo and his Companions of the Ring have been beset by danger during their quest to prevent the Ruling Ring from falling into the hands of the Dark Lord by destroying it in the Cracks of Doom. They have lost the wizard, Gandalf, in a battle in the Mines of Moria. And Boromir, seduced by the power of the Ring, tried to seize it by force. While Frodo and Sam made their escape, the rest of the company was attacked by Orcs. Now they continue the journey alone down the great River Anduin—alone, that is, save for the mysterious creeping figure that follows wherever they go."
-        type:
+        booktype:
           type: string
           description: "What kind of text is it"
           enum:
             - novel
             - short-story
             - poem
-      xml:
-        name: Book
+    NewBook:
+      type: object
+      required:
+        - name
+        - author
+        - type
+      properties:
+        title:
+          type: string
+          example: "Lord of the Rings: Two Towers"
+        author:
+          type: string
+          example: "jrrtolkien"
+        isbns:
+          type: array
+          xml:
+            name: isbn
+            wrapped: true
+          items:
+            type: string
+            example: "9780547928203"
+        cover:
+          type: string
+          example: "https://upload.wikimedia.org/wikipedia/en/a/a1/The_Two_Towers_cover.gif"
+        publisher:
+          type: string
+          example: "Harper Collins"
+        published:
+          type: string
+          example: "2012-09-18"
+        genres:
+          type: array
+          xml:
+            name: genre
+            wrapped: true
+          items:
+            type: string
+            example: "fantasy"
+        synopsis:
+          type: string
+          example: "Frodo and his Companions of the Ring have been beset by danger during their quest to prevent the Ruling Ring from falling into the hands of the Dark Lord by destroying it in the Cracks of Doom. They have lost the wizard, Gandalf, in a battle in the Mines of Moria. And Boromir, seduced by the power of the Ring, tried to seize it by force. While Frodo and Sam made their escape, the rest of the company was attacked by Orcs. Now they continue the journey alone down the great River Anduin—alone, that is, save for the mysterious creeping figure that follows wherever they go."
+        booktype:
+          type: string
+          description: "What kind of text is it"
+          enum:
+            - Novel
+            - ShortStory
+            - Poem
     ApiResponse:
       type: object
       properties:
