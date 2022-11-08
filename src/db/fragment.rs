@@ -184,16 +184,12 @@ pub fn new(
 /// If an error is returned by diesel, forward it to the function
 /// calling `delete`
 pub fn update(connector: &mut PgConnection, fragment: Bookfragment) -> ApiResult<usize> {
-    let book_fragments = dsl::bookfragments
-        .filter(dsl::rank.eq(fragment.rank))
-        .filter(dsl::id.ne(fragment.id))
-        .load::<Bookfragment>(connector)?;
-    // Move the fragment before updating it
-    // TODO: Check if the fragment exists first
-    if book_fragments.len() > 1 {
-        move_frag_id(connector, fragment.id, fragment.rank)?;
-    };
-    diesel::update(dsl::bookfragments)
+    let original_frag = dsl::bookfragments.find(fragment.id).first::<Bookfragment>(connector)?;
+    // Move the fragment if the update moves it
+    if original_frag.rank != fragment.rank {
+        move_frag_id(connector, fragment.id, fragment.rank);
+    }
+    diesel::update(dsl::bookfragments.find(fragment.id))
         .set(fragment)
         .execute(connector)
 }
