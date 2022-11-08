@@ -1,7 +1,7 @@
 use crate::{ApiKey, Json, JsonResponse, ServerState};
 
-use alexandria::models::Author;
 use alexandria::db::author;
+use alexandria::models::Author;
 use rocket::http::Status;
 use rocket::response::status;
 use rocket::serde::Deserialize;
@@ -124,11 +124,25 @@ pub fn find(
 ///
 /// Any error from the server will be returned to the user as a 500
 /// HTTP error.
-// TODO: Handle author not found
 #[get("/<id>")]
 pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Author> {
     let connector = &mut get_connector!(db);
-    json_val_or_error!(author::get(connector, id))
+    match author::get(connector, id) {
+        Ok(val) => Ok(Json(val)),
+        Err(e) => {
+            use diesel::result::Error::NotFound;
+            match e {
+                NotFound => server_error!(
+                    Status::NotFound,
+                    format!("Author ID {} not found", id)
+                ),
+                other => server_error!(
+                    Status::InternalServerError,
+                    other.to_string()
+                ),
+            }
+        }
+    }
 }
 
 /// Delete an author
