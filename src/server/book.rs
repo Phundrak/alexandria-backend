@@ -81,7 +81,6 @@ pub fn new(
 ///
 /// Any error from the server will be returned to the user as a 500
 /// HTTP error.
-// TODO: Handle book not found
 #[put("/", format = "json", data = "<book>")]
 pub fn update(book: Json<Book>, db: &State<ServerState>) -> JsonResponse<()> {
     let connector = &mut get_connector!(db);
@@ -91,20 +90,25 @@ pub fn update(book: Json<Book>, db: &State<ServerState>) -> JsonResponse<()> {
         Ok(val) => {
             if val == 1 {
                 Ok(Json(()))
-            } else if val == 0 {
-                Err(status::Custom(
-                    Status::NotFound,
-                    format!("Book with ID {} not found", id),
-                ))
             } else {
-                Err(
-                    status::Custom(
-                        Status::InternalServerError,
-                        format!("Something went horribly wrong, {} books affected. Please report this as a bug", val)))
+                server_error!(
+                    Status::InternalServerError,
+                    format!("Something went wrong, {} books updated", val)
+                )
             }
         }
         Err(e) => {
-            Err(status::Custom(Status::InternalServerError, e.to_string()))
+            use diesel::result::Error::NotFound;
+            match e {
+                NotFound => server_error!(
+                    Status::NotFound,
+                    format!("Book ID {} not found", id)
+                ),
+                other => server_error!(
+                    Status::InternalServerError,
+                    other.to_string()
+                ),
+            }
         }
     }
 }
@@ -130,12 +134,26 @@ pub fn find(db: &State<ServerState>, name: String) -> JsonResponse<Vec<Book>> {
 ///
 /// Any error from the server will be returned to the user as a 500
 /// HTTP error.
-// TODO: Handle book not found
 #[get("/<id>")]
 pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Book> {
     info!("Retrieving book {}", id);
     let connector = &mut get_connector!(db);
-    json_val_or_error!(book::get(connector, id))
+    match book::get(connector, id) {
+        Ok(val) => Ok(Json(val)),
+        Err(e) => {
+            use diesel::result::Error::NotFound;
+            match e {
+                NotFound => server_error!(
+                    Status::NotFound,
+                    format!("Book ID {} not found", id)
+                ),
+                other => server_error!(
+                    Status::InternalServerError,
+                    other.to_string()
+                ),
+            }
+        }
+    }
 }
 
 /// Delete the book with a set ID

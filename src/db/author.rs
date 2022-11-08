@@ -37,8 +37,8 @@ pub fn update(
     connector: &mut PgConnection,
     author: Author,
 ) -> ApiResult<usize> {
-    diesel::insert_into(dsl::authors)
-        .values(author)
+    diesel::update(dsl::authors.find(author.id))
+        .set(author)
         .execute(connector)
 }
 

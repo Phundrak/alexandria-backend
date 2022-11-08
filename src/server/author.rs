@@ -87,7 +87,6 @@ pub fn new(
 ///
 /// Any error from the server will be returned to the user as a 500
 /// HTTP error.
-// TODO: Handle author not found
 #[put("/", format = "json", data = "<author>")]
 pub fn update(
     author: Json<Author>,

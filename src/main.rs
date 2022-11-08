@@ -70,13 +70,22 @@ pub struct ServerState {
 
 type JsonResponse<T> = Result<Json<T>, status::Custom<String>>;
 
+macro_rules! server_error {
+    ($kind:expr,$message:expr) => {
+        Err(status::Custom($kind, $message))
+    };
+    ($kind:expr) => {
+        Err(status::Custom($kind))
+    }
+}
+
 macro_rules! json_val_or_error {
     ($result:expr) => {
         match $result {
             Ok(val) => Ok(Json(val)),
             Err(e) => {
                 info!("Error: {}", e.to_string());
-                Err(status::Custom(Status::InternalServerError, e.to_string()))
+                server_error!(Status::InternalServerError, e.to_string())
             }
         }
     };

@@ -45,7 +45,7 @@ pub fn get(connector: &mut PgConnection, identifier: Uuid) -> ApiResult<Book> {
 /// If an error is returned by diesel, forward it to the function
 /// calling `get`
 pub fn update(connector: &mut PgConnection, book: Book) -> ApiResult<usize> {
-    diesel::update(dsl::books)
+    diesel::update(dsl::books.find(book.id))
         .set(book)
         .execute(connector)
 }
