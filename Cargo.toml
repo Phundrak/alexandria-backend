@@ -16,9 +16,14 @@ dotenvy = "0.15"
 
 # database
 diesel = { version = "2.0.2", features = ["postgres", "extras"] }
+diesel_migrations = "2.0.0"
 diesel-derive-enum = { version = "2.0.0-rc.0", features = ["postgres"] }
 chrono = { version = "0.4.22", features = ["serde"] }
 uuid = { version = "1.2.1", features = ["v4", "fast-rng", "macro-diagnostics", "serde" ] }
+
+# logging
+tracing = "0.1.37"
+tracing-subscriber = "0.3.16"
 
 # web server
 rocket = { version = "0.5.0-rc.2", features = ["json", "uuid"] }

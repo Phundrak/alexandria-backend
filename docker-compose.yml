@@ -1,6 +1,15 @@
 version: '3'
 
 services:
+  alexandria:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - 127.0.0.1:8000:8000
+    depends_on:
+      - database
+
   database:
     image: postgres:15-alpine
     restart: unless-stopped

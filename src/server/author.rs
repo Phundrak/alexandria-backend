@@ -1,11 +1,13 @@
+use crate::db::author;
+use crate::db::get_connector;
+use crate::models::Author;
+use crate::server::{json_val_or_error, make_error};
 use crate::{ApiKey, Json, JsonResponse, ServerState};
 
-use alexandria::db::author;
-use alexandria::models::Author;
 use rocket::http::Status;
 use rocket::response::status;
 use rocket::serde::Deserialize;
-use rocket::{log::private::info, State};
+use rocket::State;
 use uuid::Uuid;
 
 #[derive(Deserialize, Debug, Clone)]
@@ -132,14 +134,13 @@ pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Author> {
         Err(e) => {
             use diesel::result::Error::NotFound;
             match e {
-                NotFound => server_error!(
+                NotFound => make_error!(
                     Status::NotFound,
                     format!("Author ID {} not found", id)
                 ),
-                other => server_error!(
-                    Status::InternalServerError,
-                    other.to_string()
-                ),
+                other => {
+                    make_error!(Status::InternalServerError, other.to_string())
+                }
             }
         }
     }

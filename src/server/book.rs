@@ -1,11 +1,14 @@
+use crate::db::book::{self, SearchQuery};
+use crate::db::get_connector;
+use crate::models::{Book, BookType};
+use crate::server::{json_val_or_error, make_error};
 use crate::{ApiKey, Json, JsonResponse, ServerState};
 
-use alexandria::models::{Book, BookType};
-use alexandria::db::book;
 use rocket::http::Status;
 use rocket::response::status;
 use rocket::serde::Deserialize;
-use rocket::{log::private::info, State};
+use rocket::State;
+use tracing::info;
 use uuid::Uuid;
 
 /// Data the user can send to create or update a book
@@ -91,7 +94,7 @@ pub fn update(book: Json<Book>, db: &State<ServerState>) -> JsonResponse<()> {
             if val == 1 {
                 Ok(Json(()))
             } else {
-                server_error!(
+                make_error!(
                     Status::InternalServerError,
                     format!("Something went wrong, {} books updated", val)
                 )
@@ -100,14 +103,13 @@ pub fn update(book: Json<Book>, db: &State<ServerState>) -> JsonResponse<()> {
         Err(e) => {
             use diesel::result::Error::NotFound;
             match e {
-                NotFound => server_error!(
+                NotFound => make_error!(
                     Status::NotFound,
                     format!("Book ID {} not found", id)
                 ),
-                other => server_error!(
-                    Status::InternalServerError,
-                    other.to_string()
-                ),
+                other => {
+                    make_error!(Status::InternalServerError, other.to_string())
+                }
             }
         }
     }
@@ -143,14 +145,13 @@ pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Book> {
         Err(e) => {
             use diesel::result::Error::NotFound;
             match e {
-                NotFound => server_error!(
+                NotFound => make_error!(
                     Status::NotFound,
                     format!("Book ID {} not found", id)
                 ),
-                other => server_error!(
-                    Status::InternalServerError,
-                    other.to_string()
-                ),
+                other => {
+                    make_error!(Status::InternalServerError, other.to_string())
+                }
             }
         }
     }

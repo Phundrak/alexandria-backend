@@ -1,12 +1,14 @@
+use crate::db::fragment;
+use crate::db::get_connector;
+use crate::models::{Bookfragment, ImageType, SoundType};
+use crate::server::{json_val_or_error, make_error};
 use crate::{ApiKey, Json, JsonResponse, ServerState};
 
-use alexandria::db::fragment;
-use alexandria::models::{Bookfragment, ImageType, SoundType};
 use rocket::http::Status;
 use rocket::response::status;
 use rocket::serde::uuid::Uuid;
 use rocket::serde::Deserialize;
-use rocket::{log::private::info, State};
+use rocket::State;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -77,14 +79,13 @@ pub fn get(db: &State<ServerState>, id: Uuid) -> JsonResponse<Bookfragment> {
         Err(e) => {
             use diesel::result::Error::NotFound;
             match e {
-                NotFound => server_error!(
+                NotFound => make_error!(
                     Status::NotFound,
                     format!("Fragment with ID {} not found", id)
                 ),
-                other => server_error!(
-                    Status::InternalServerError,
-                    other.to_string()
-                ),
+                other => {
+                    make_error!(Status::InternalServerError, other.to_string())
+                }
             }
         }
     }
@@ -139,14 +140,13 @@ pub fn update(
         Err(e) => {
             use diesel::result::Error::NotFound;
             match e {
-                NotFound => server_error!(
+                NotFound => make_error!(
                     Status::NotFound,
                     format!("Fragment ID {} not found", id)
                 ),
-                other => server_error!(
-                    Status::InternalServerError,
-                    other.to_string()
-                ),
+                other => {
+                    make_error!(Status::InternalServerError, other.to_string())
+                }
             }
         }
     }
@@ -192,14 +192,13 @@ pub fn reorder(
         Err(e) => {
             use diesel::result::Error::NotFound;
             match e {
-                NotFound => server_error!(
+                NotFound => make_error!(
                     Status::NotFound,
                     format!("Fragment ID {} not found", id)
                 ),
-                other => server_error!(
-                    Status::InternalServerError,
-                    other.to_string()
-                ),
+                other => {
+                    make_error!(Status::InternalServerError, other.to_string())
+                }
             }
         }
     }

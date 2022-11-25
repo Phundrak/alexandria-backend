@@ -1,32 +1,29 @@
 #![warn(clippy::style, clippy::pedantic)]
 #![allow(clippy::no_effect_underscore_binding, clippy::needless_pass_by_value)]
 
-#[macro_use]
-extern crate rocket;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
+
 use dotenvy::dotenv;
+
+#[macro_use]
+extern crate rocket;
 use rocket::http::{Method, Status};
 use rocket::request::{FromRequest, Outcome, Request};
 use rocket::response::status;
 use rocket::serde::json::Json;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
+
+use tracing::{info, Level};
+use tracing_subscriber::FmtSubscriber;
+
 use std::env;
 use std::error::Error;
 
-macro_rules! get_connector {
-    ($db:expr) => {
-        match $db.pool.get() {
-            Ok(val) => val,
-            Err(_) => {
-                return Err(status::Custom(
-                    Status::InternalServerError,
-                    "Failed to connect to the database".to_owned(),
-                ));
-            }
-        }
-    };
-}
+pub mod db;
+pub mod models;
+pub mod schema;
+pub mod server;
 
 #[derive(Copy, Clone)]
 pub struct ApiKey<'r>(&'r str);
@@ -70,29 +67,6 @@ pub struct ServerState {
 
 type JsonResponse<T> = Result<Json<T>, status::Custom<String>>;
 
-macro_rules! server_error {
-    ($kind:expr,$message:expr) => {
-        Err(status::Custom($kind, $message))
-    };
-    ($kind:expr) => {
-        Err(status::Custom($kind))
-    }
-}
-
-macro_rules! json_val_or_error {
-    ($result:expr) => {
-        match $result {
-            Ok(val) => Ok(Json(val)),
-            Err(e) => {
-                info!("Error: {}", e.to_string());
-                server_error!(Status::InternalServerError, e.to_string())
-            }
-        }
-    };
-}
-
-pub mod server;
-
 fn make_cors(
     allowed_origins: AllowedOrigins,
 ) -> Result<rocket_cors::Cors, rocket_cors::Error> {
@@ -109,15 +83,31 @@ fn make_cors(
     .to_cors()
 }
 
+fn setup_logging() {
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::DEBUG)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("Setting default subscriber failed");
+}
+
 #[rocket::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     color_eyre::install().unwrap();
+    setup_logging();
+
+    info!("Reading environment variables");
     dotenv().ok();
 
     // NOTE: Maybe handle allowed origins through an env variable?
     let allowed_origins = AllowedOrigins::some_regex(&[".*"]);
     let cors = make_cors(allowed_origins)?;
 
+    info!("Getting database connection manager pool");
+    let pool = db::get_connection_pool();
+    db::run_migrations(&mut pool.get()?)?;
+
+    info!("Launching server");
     #[allow(clippy::let_underscore_drop)]
     let _ = rocket::build()
         .attach(cors)
@@ -153,7 +143,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             ],
         )
         .manage(ServerState {
-            pool: alexandria::db::get_connection_pool(),
+            pool,
             api_key: env::var("ALEXANDRIA_ADMIN_KEY")
                 .expect("ALEXANDRIA_ADMIN_KEY must be set!"),
         })

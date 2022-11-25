@@ -29,7 +29,7 @@ pub struct Author {
 /// See [`Book`]
 ///
 /// [`Book`]: ./struct.Book.html
-#[derive(Debug, Serialize, Deserialize, diesel_derive_enum::DbEnum, Clone)]
+#[derive(Debug, Serialize, Deserialize, diesel_derive_enum::DbEnum, Clone, PartialEq, Eq, Copy)]
 #[DieselTypePath = "crate::schema::sql_types::Booktype"]
 #[serde(crate = "rocket::serde")]
 pub enum BookType {
