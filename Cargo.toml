@@ -27,8 +27,7 @@ tracing-subscriber = "0.3.16"
 
 # web server
 rocket = { version = "0.5.0-rc.2", features = ["json", "uuid"] }
-# TODO: Find a stable commit
-rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
+rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", rev = "c17e814" }
 
 # better error output
 color-eyre = "0.6.2"
