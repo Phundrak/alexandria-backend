@@ -1,10 +1,25 @@
 use diesel::{
     insert_into, PgConnection, PgTextExpressionMethods, QueryDsl, RunQueryDsl,
 };
+use rocket::serde::Deserialize;
 use uuid::Uuid;
 
+use crate::models::BookType;
 use crate::schema::books::dsl;
-use crate::{models::Book, db::ApiResult};
+use crate::{db::ApiResult, models::Book};
+
+/// Advanced search query for books
+///
+/// See [`BookType`] for possible values of `booktype`.
+///
+/// [`BookType`]: ../../models/enum.BookType.html
+#[derive(Debug, Clone, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct SearchQuery {
+    pub name: Option<String>,
+    pub genre: Option<Vec<String>>,
+    pub booktype: Option<BookType>,
+}
 
 /// Add a new book in the database
 ///
@@ -67,6 +82,47 @@ pub fn find(
     dsl::books
         .filter(dsl::title.ilike(query))
         .load::<Book>(connector)
+}
+
+/// Do an advanced search for books
+///
+/// Search a book by its title, type, and genres. Similar to [`find`].
+/// See [`SearchQuery`] for more details.
+///
+/// # Errors
+///
+/// Any error returned by diesel will be forwarded to the function
+/// calling `advanced_find`
+///
+/// [`SearchQuery`]: ./struct.SearchQuery.html
+/// [`find`]: ./fn.find.html
+pub fn advanced_find(
+    connector: &mut PgConnection,
+    search: SearchQuery,
+) -> ApiResult<Vec<Book>> {
+    let books: Vec<Book> = dsl::books
+        .filter(
+            dsl::title.ilike(format!("%{}%", search.name.unwrap_or_default())),
+        )
+        .load::<Book>(connector)?
+        .iter()
+        .filter(|book| if let Some(booktype) = search.booktype {
+            booktype == book.booktype
+        } else {
+            false
+        })
+        .filter(|book| if let Some(search_genre) = &search.genre {
+            if let Some(book_genre) = &book.genre {
+                search_genre.iter().all(|g| book_genre.contains(&Some(g.clone())))
+            } else {
+                false
+            }
+        } else {
+            false
+        })
+        .map(std::clone::Clone::clone)
+        .collect();
+    Ok(books)
 }
 
 /// Delete a specific book from the database

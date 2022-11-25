@@ -130,6 +130,19 @@ pub fn find(db: &State<ServerState>, name: String) -> JsonResponse<Vec<Book>> {
     json_val_or_error!(book::find(connector, &name))
 }
 
+/// Perform an advanced search query for books.
+///
+/// Search for books matching a certain title, type, or genres. See
+/// `SearchQuery` for more details.
+#[get("/find", format = "json", data = "<search>")]
+pub fn advanced_find(
+    db: &State<ServerState>,
+    search: Json<SearchQuery>,
+) -> JsonResponse<Vec<Book>> {
+    let connector = &mut get_connector!(db);
+    json_val_or_error!(book::advanced_find(connector, search.into_inner()))
+}
+
 /// Get a book by its ID
 ///
 /// # Errors
