@@ -14,6 +14,21 @@ Edit the new `.env` file to match your existing PostgreSQL instance.
 Hopefully the whole project will soon be entirely available within a
 Docker container.
 
+## Docker
+If you can use Docker, the easiest way to spin up Alexandria is to
+execute the following command:
+```shell
+docker-compose build # build the Alexandria image
+docker-compose up # spin up the project, add -d to detach
+```
+
+If you launched Alexandria as a detached container, you can stop it
+with:
+```shell
+docker-compose down
+```
+
+## Unix
 ### Compile the project
 ```shell
 cargo build
@@ -35,7 +50,8 @@ diesel migration run
 ```
 
 In case PostgreSQL isn’t already running, you can run it in Docker
-with the provided `docker-compose.yml`:
+with the provided `docker-compose.yml`. Just disable the Alexandria
+container first (you can comment it out).
 
 ```shell
 docker-compose up -d
